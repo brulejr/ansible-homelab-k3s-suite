@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: traefik
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: source
+spec:
+  interval: 1h0m0s
+  url: https://traefik.github.io/charts

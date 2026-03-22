@@ -1,0 +1,64 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: ingress
+spec:
+  interval: 15m0s
+  releaseName: traefik
+  targetNamespace: traefik
+  install:
+    createNamespace: false
+  chart:
+    spec:
+      chart: traefik
+      version: "34.*"
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: traefik
+  values:
+    deployment:
+      replicas: 1
+
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+
+    providers:
+      kubernetesCRD:
+        enabled: true
+      kubernetesIngress:
+        enabled: true
+
+    service:
+      type: LoadBalancer
+
+    ports:
+      web:
+        port: 8000
+        exposedPort: 80
+        protocol: TCP
+      websecure:
+        port: 8443
+        exposedPort: 443
+        protocol: TCP
+      ssh:
+        port: 8022
+        exposedPort: 22
+        protocol: TCP
+
+    logs:
+      general:
+        level: INFO
+
+    api:
+      dashboard: false
+
+    additionalArguments:
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"

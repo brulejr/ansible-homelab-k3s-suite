@@ -1,0 +1,67 @@
+---
+- name: Ensure Traefik working directory exists
+  ansible.builtin.file:
+    path: "{{ homelab_apps_dir }}/traefik"
+    state: directory
+    mode: "0755"
+
+- name: Ensure Traefik namespace exists
+  ansible.builtin.command:
+    cmd: "{{ traefik_kubectl_command }} --kubeconfig {{ traefik_kubeconfig }} create namespace {{ traefik_namespace }}"
+  register: traefik_namespace_create
+  changed_when: "'created' in traefik_namespace_create.stdout"
+  failed_when: >
+    traefik_namespace_create.rc != 0 and
+    'AlreadyExists' not in traefik_namespace_create.stderr
+
+- name: Add Traefik Helm repo
+  ansible.builtin.command:
+    cmd: "{{ traefik_helm_command }} repo add {{ traefik_repo_name }} {{ traefik_repo_url }}"
+  register: traefik_repo_add
+  changed_when: "'has been added' in traefik_repo_add.stdout or 'already exists' not in traefik_repo_add.stderr"
+  failed_when: >
+    traefik_repo_add.rc != 0 and
+    'already exists' not in traefik_repo_add.stderr
+
+- name: Update Helm repos
+  ansible.builtin.command:
+    cmd: "{{ traefik_helm_command }} repo update"
+  changed_when: false
+
+- name: Render Traefik Helm values
+  ansible.builtin.template:
+    src: "traefik-values.yaml.j2"
+    dest: "{{ traefik_values_file }}"
+    mode: "0644"
+
+- name: Install or upgrade Traefik
+  ansible.builtin.command:
+    cmd: >
+      {{ traefik_helm_command }} upgrade --install {{ traefik_release_name }} {{ traefik_chart_ref }}
+      --namespace {{ traefik_namespace }}
+      --version {{ traefik_chart_version }}
+      --kubeconfig {{ traefik_kubeconfig }}
+      --values {{ traefik_values_file }}
+      --wait
+  register: traefik_helm_result
+  changed_when: >
+    'has been upgraded' in traefik_helm_result.stdout or
+    'has been installed' in traefik_helm_result.stdout
+
+- name: Wait for Traefik CRD middleware.traefik.io
+  ansible.builtin.command:
+    cmd: "{{ traefik_kubectl_command }} --kubeconfig {{ traefik_kubeconfig }} get crd middlewares.traefik.io"
+  register: traefik_middleware_crd
+  changed_when: false
+  retries: 24
+  delay: 5
+  until: traefik_middleware_crd.rc == 0
+
+- name: Wait for Traefik CRD ingressroutes.traefik.io
+  ansible.builtin.command:
+    cmd: "{{ traefik_kubectl_command }} --kubeconfig {{ traefik_kubeconfig }} get crd ingressroutes.traefik.io"
+  register: traefik_ingressroute_crd
+  changed_when: false
+  retries: 24
+  delay: 5
+  until: traefik_ingressroute_crd.rc == 0

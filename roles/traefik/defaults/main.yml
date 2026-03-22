@@ -1,0 +1,16 @@
+---
+traefik_enabled: true
+
+traefik_namespace: "traefik"
+traefik_release_name: "traefik"
+traefik_chart_ref: "traefik/traefik"
+traefik_chart_version: "34.0.0"
+
+traefik_repo_name: "traefik"
+traefik_repo_url: "https://traefik.github.io/charts"
+
+traefik_values_file: "{{ homelab_apps_dir }}/traefik/traefik-values.yaml"
+
+traefik_kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+traefik_helm_command: "helm"
+traefik_kubectl_command: "k3s kubectl"

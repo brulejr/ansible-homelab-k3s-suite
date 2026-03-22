@@ -1,0 +1,17 @@
+---
+flux_enabled: true
+
+flux_bootstrap_dir: "{{ homelab_apps_dir }}/flux/bootstrap/flux-system"
+
+flux_git_url: ""
+flux_git_branch: main
+flux_git_path: "./kubernetes/overlays/minidev-attached"
+flux_git_interval: "1m0s"
+flux_kustomization_interval: "10m0s"
+flux_kustomization_prune: true
+
+flux_git_repository_name: "flux-system"
+flux_kustomization_name: "flux-system"
+
+flux_kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+flux_kubectl_command: "k3s kubectl"

@@ -1,0 +1,16 @@
+---
+- name: Setup the mini development K3s servers
+  hosts: minidev_servers
+  become: true
+  roles:
+    # Current active deployment mode:
+    # - Ansible installs K3s
+    # - Ansible installs Traefik directly via Helm
+    # - Ansible applies the selected Kubernetes overlay directly
+    #
+    # Flux/GitOps files remain in the repo for later reintroduction after
+    # suite/inventory separation, but are not active in this play path.
+    - storage_prep
+    - k3s_server
+    - traefik
+    - k8s_apply

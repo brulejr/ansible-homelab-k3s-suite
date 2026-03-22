@@ -1,0 +1,82 @@
+---
+- name: Validate k8s apply variables
+  ansible.builtin.assert:
+    that:
+      - k8s_overlay_name | length > 0
+      - plantuml_hostname | length > 0
+      - wikijs_hostname | length > 0
+    fail_msg: "k8s_overlay_name, plantuml_hostname, and wikijs_hostname are required."
+
+- name: Ensure local secret directory exists on controller
+  ansible.builtin.file:
+    path: "{{ k8s_local_secret_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate or read Wiki.js DB password from controller-local file
+  ansible.builtin.set_fact:
+    wikijs_db_password: >-
+      {{ lookup('ansible.builtin.password', wikijs_db_password_file ~ ' length=' ~ wikijs_db_password_length|string) }}
+  no_log: true
+
+- name: Ensure remote manifest staging directory exists
+  ansible.builtin.file:
+    path: "{{ k8s_remote_staging_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy kubernetes manifest tree to target
+  ansible.posix.synchronize:
+    src: "{{ playbook_dir }}/kubernetes/"
+    dest: "{{ k8s_remote_staging_dir }}/"
+    recursive: true
+    delete: true
+
+- name: Ensure remote overlay secrets directory exists
+  ansible.builtin.file:
+    path: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets"
+    state: directory
+    mode: "0755"
+
+- name: Render postgres secret into remote staged overlay
+  ansible.builtin.template:
+    src: "postgres-secret.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/postgres-secret.yaml"
+    mode: "0600"
+  no_log: true
+
+- name: Render Wiki.js secret into remote staged overlay
+  ansible.builtin.template:
+    src: "wikijs-secret.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/wikijs-secret.yaml"
+    mode: "0600"
+  no_log: true
+
+- name: Render PlantUML route into staged routing tree
+  ansible.builtin.template:
+    src: "plantuml-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/plantuml-ingressroute.yaml"
+    mode: "0644"
+
+- name: Render Wiki.js route into staged routing tree
+  ansible.builtin.template:
+    src: "wikijs-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/wikijs-ingressroute.yaml"
+    mode: "0644"
+
+- name: Apply Kubernetes overlay
+  ansible.builtin.command:
+    cmd: >
+      {{ k8s_kubectl_command }}
+      --kubeconfig {{ k8s_kubeconfig }}
+      apply -k {{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}
+  register: k8s_apply_result
+  changed_when: >
+    'created' in k8s_apply_result.stdout or
+    'configured' in k8s_apply_result.stdout
+
+- name: Show kubectl apply output
+  ansible.builtin.debug:
+    var: k8s_apply_result.stdout_lines

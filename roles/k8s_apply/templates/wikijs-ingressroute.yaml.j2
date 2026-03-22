@@ -1,0 +1,21 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wikijs
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: wikijs
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: routing
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ wikijs_hostname }}`)
+      kind: Rule
+      middlewares:
+        - name: default-security-headers
+          namespace: traefik
+      services:
+        - name: wikijs
+          port: 3000

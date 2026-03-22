@@ -1,0 +1,3 @@
+inventories/examples/*/group_vars/vault.yml
+.secrets/
+*.retry

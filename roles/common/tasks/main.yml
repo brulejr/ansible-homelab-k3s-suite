@@ -1,0 +1,16 @@
+---
+- name: Install required base packages
+  ansible.builtin.package:
+    name:
+      - curl
+      - rsync
+      - tar
+    state: present
+
+- name: Install Helm
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/helm

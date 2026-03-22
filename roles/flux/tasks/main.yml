@@ -1,0 +1,86 @@
+---
+- name: Validate Flux variables
+  ansible.builtin.assert:
+    that:
+      - flux_git_url | length > 0
+      - flux_git_branch | length > 0
+      - flux_git_path | length > 0
+    fail_msg: "Flux requires flux_git_url, flux_git_branch, and flux_git_path."
+
+- name: Ensure Flux bootstrap directory exists
+  ansible.builtin.file:
+    path: "{{ flux_bootstrap_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy gotk-components.yaml to target
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/kubernetes/bootstrap/flux-system/gotk-components.yaml"
+    dest: "{{ flux_bootstrap_dir }}/gotk-components.yaml"
+    mode: "0644"
+
+- name: Render bootstrap kustomization.yaml to target
+  ansible.builtin.template:
+    src: "bootstrap-kustomization.yaml.j2"
+    dest: "{{ flux_bootstrap_dir }}/kustomization.yaml"
+    mode: "0644"
+
+- name: Render gotk-sync.yaml to target
+  ansible.builtin.template:
+    src: "gotk-sync.yaml.j2"
+    dest: "{{ flux_bootstrap_dir }}/gotk-sync.yaml"
+    mode: "0644"
+
+- name: Apply Flux components first
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} apply -k {{ flux_bootstrap_dir }}"
+  register: flux_components_apply_result
+  changed_when: >
+    'created' in flux_components_apply_result.stdout or
+    'configured' in flux_components_apply_result.stdout
+
+- name: Wait for GitRepository CRD to exist
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} get crd gitrepositories.source.toolkit.fluxcd.io"
+  register: flux_gitrepo_crd_result
+  changed_when: false
+  retries: 24
+  delay: 5
+  until: flux_gitrepo_crd_result.rc == 0
+
+- name: Wait for Kustomization CRD to exist
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} get crd kustomizations.kustomize.toolkit.fluxcd.io"
+  register: flux_kustomization_crd_result
+  changed_when: false
+  retries: 24
+  delay: 5
+  until: flux_kustomization_crd_result.rc == 0
+
+- name: Wait for source-controller deployment rollout
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} -n flux-system rollout status deployment/source-controller --timeout=180s"
+  register: flux_source_rollout_result
+  changed_when: false
+
+- name: Wait for kustomize-controller deployment rollout
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} -n flux-system rollout status deployment/kustomize-controller --timeout=180s"
+  register: flux_kustomize_rollout_result
+  changed_when: false
+
+- name: Apply Flux sync objects
+  ansible.builtin.command:
+    cmd: "{{ flux_kubectl_command }} --kubeconfig {{ flux_kubeconfig }} apply -f {{ flux_bootstrap_dir }}/gotk-sync.yaml"
+  register: flux_sync_apply_result
+  changed_when: >
+    'created' in flux_sync_apply_result.stdout or
+    'configured' in flux_sync_apply_result.stdout
+
+- name: Show Flux components apply output
+  ansible.builtin.debug:
+    var: flux_components_apply_result.stdout_lines
+
+- name: Show Flux sync apply output
+  ansible.builtin.debug:
+    var: flux_sync_apply_result.stdout_lines

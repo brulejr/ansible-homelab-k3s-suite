@@ -1,0 +1,15 @@
+---
+homelab_root_dir: /opt/homelab
+homelab_apps_dir: "{{ homelab_root_dir }}/apps"
+homelab_data_dir: "{{ homelab_root_dir }}/data"
+
+storage_prep_directories:
+  - "{{ homelab_root_dir }}"
+  - "{{ homelab_apps_dir }}"
+  - "{{ homelab_data_dir }}"
+  - "{{ homelab_data_dir }}/k3s"
+  - "{{ homelab_data_dir }}/k3s/local-path"
+  - "{{ homelab_data_dir }}/mqtt"
+  - "{{ homelab_data_dir }}/wikijs"
+  - "{{ homelab_data_dir }}/gitea"
+  - "{{ homelab_data_dir }}/openwebrx"

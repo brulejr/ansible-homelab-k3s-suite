@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/namespaces
+  - ../../base/traefik
+  - ../../base/plantuml
+  - ../../base/mqtt
+  - ../../base/wikijs
+  - ../../routing/minidev-portable
+  - secrets/postgres-secret.yaml
+  - secrets/wikijs-secret.yaml

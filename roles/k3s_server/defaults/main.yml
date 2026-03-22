@@ -1,0 +1,32 @@
+---
+k3s_enabled: true
+
+k3s_channel: stable
+k3s_version: ""
+k3s_install_url: "https://get.k3s.io"
+
+k3s_config_dir: /etc/rancher/k3s
+k3s_config_file: "{{ k3s_config_dir }}/config.yaml"
+k3s_kubeconfig_file: /etc/rancher/k3s/k3s.yaml
+k3s_service_name: k3s
+
+k3s_server_token: ""
+k3s_write_kubeconfig_mode: "0644"
+
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+k3s_cluster_dns: ""
+k3s_cluster_domain: "cluster.local"
+
+k3s_disable:
+  - traefik
+
+k3s_tls_sans: []
+
+k3s_default_local_storage_path: "{{ homelab_data_dir }}/k3s/local-path"
+
+k3s_extra_server_args: []
+k3s_kube_apiserver_args: []
+k3s_kube_controller_manager_args: []
+k3s_kube_scheduler_args: []
+k3s_kubelet_args: []

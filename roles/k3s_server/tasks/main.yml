@@ -1,0 +1,101 @@
+---
+- name: Validate K3s variables
+  ansible.builtin.assert:
+    that:
+      - k3s_server_token | length > 0
+    fail_msg: "k3s_server_token is required."
+
+- name: Ensure K3s config directory exists
+  ansible.builtin.file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure default local storage root exists
+  ansible.builtin.file:
+    path: "{{ k3s_default_local_storage_path }}"
+    state: directory
+    mode: "0755"
+
+- name: Render K3s config.yaml
+  ansible.builtin.template:
+    src: "config.yaml.j2"
+    dest: "{{ k3s_config_file }}"
+    mode: "0600"
+  register: k3s_config_render
+
+- name: Install and start K3s server
+  block:
+    - name: Install K3s server
+      ansible.builtin.shell: |
+        set -euo pipefail
+        curl -sfL {{ k3s_install_url }} | {% if k3s_version | length > 0 %}INSTALL_K3S_VERSION="{{ k3s_version }}" {% endif %}INSTALL_K3S_CHANNEL="{{ k3s_channel }}" sh -s - server
+      args:
+        executable: /bin/bash
+      register: k3s_install_result
+      changed_when: "'installed' in (k3s_install_result.stdout | lower) or 'created symlink' in (k3s_install_result.stdout | lower) or k3s_config_render.changed"
+
+    - name: Ensure K3s service is enabled and started
+      ansible.builtin.service:
+        name: "{{ k3s_service_name }}"
+        enabled: true
+        state: started
+
+    - name: Restart K3s when config changed
+      ansible.builtin.service:
+        name: "{{ k3s_service_name }}"
+        state: restarted
+      when: k3s_config_render.changed
+
+    - name: Wait for kubeconfig to exist
+      ansible.builtin.wait_for:
+        path: "{{ k3s_kubeconfig_file }}"
+        state: present
+        timeout: 120
+
+    - name: Wait for Kubernetes API to respond
+      ansible.builtin.command:
+        cmd: "k3s kubectl --kubeconfig {{ k3s_kubeconfig_file }} get nodes"
+      register: k3s_nodes_result
+      changed_when: false
+      retries: 24
+      delay: 5
+      until: k3s_nodes_result.rc == 0
+
+  rescue:
+    - name: Show rendered K3s config.yaml
+      ansible.builtin.command:
+        cmd: "cat {{ k3s_config_file }}"
+      register: k3s_config_contents
+      changed_when: false
+      failed_when: false
+
+    - name: Show K3s service status
+      ansible.builtin.command:
+        cmd: "systemctl status {{ k3s_service_name }} --no-pager -l"
+      register: k3s_status_result
+      changed_when: false
+      failed_when: false
+
+    - name: Show recent K3s journal
+      ansible.builtin.command:
+        cmd: "journalctl -u {{ k3s_service_name }} -n 200 --no-pager"
+      register: k3s_journal_result
+      changed_when: false
+      failed_when: false
+
+    - name: Print K3s config.yaml
+      ansible.builtin.debug:
+        var: k3s_config_contents.stdout_lines
+
+    - name: Print K3s service status
+      ansible.builtin.debug:
+        var: k3s_status_result.stdout_lines
+
+    - name: Print K3s journal
+      ansible.builtin.debug:
+        var: k3s_journal_result.stdout_lines
+
+    - name: Fail with explicit K3s startup diagnostics
+      ansible.builtin.fail:
+        msg: "K3s failed to start. See the printed config.yaml, systemctl status, and journalctl output above."
