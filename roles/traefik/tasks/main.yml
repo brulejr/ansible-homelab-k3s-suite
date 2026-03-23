@@ -14,6 +14,14 @@
     traefik_namespace_create.rc != 0 and
     'AlreadyExists' not in traefik_namespace_create.stderr
 
+- name: Debug Traefik ACME variable presence
+  ansible.builtin.debug:
+    msg:
+      - "traefik_acme_enabled={{ traefik_acme_enabled | default('UNDEF') }}"
+      - "traefik_acme_email_defined={{ (traefik_acme_email | default('') | length > 0) }}"
+      - "traefik_acme_resolver_name_defined={{ (traefik_acme_resolver_name | default('') | length > 0) }}"
+      - "traefik_cloudflare_dns_api_token_defined={{ (traefik_cloudflare_dns_api_token | default('') | length > 0) }}"
+
 - name: Validate Traefik ACME variables
   ansible.builtin.assert:
     that:
