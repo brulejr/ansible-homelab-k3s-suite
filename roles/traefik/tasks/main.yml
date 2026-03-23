@@ -14,6 +14,14 @@
     traefik_namespace_create.rc != 0 and
     'AlreadyExists' not in traefik_namespace_create.stderr
 
+- name: Validate Traefik ACME variables
+  ansible.builtin.assert:
+    that:
+      - not traefik_acme_enabled or (traefik_acme_email | default('') | length > 0)
+      - not traefik_acme_enabled or (traefik_acme_resolver_name | default('') | length > 0)
+      - not traefik_acme_enabled or (traefik_cloudflare_dns_api_token | default('') | length > 0)
+    fail_msg: "Traefik ACME is enabled, but one or more required variables are missing: traefik_acme_email, traefik_acme_resolver_name, traefik_cloudflare_dns_api_token."
+
 - name: Render Cloudflare API token secret manifest
   ansible.builtin.template:
     src: "cloudflare-secret.yaml.j2"
