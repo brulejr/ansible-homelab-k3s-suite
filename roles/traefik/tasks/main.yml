@@ -14,6 +14,20 @@
     traefik_namespace_create.rc != 0 and
     'AlreadyExists' not in traefik_namespace_create.stderr
 
+- name: Render Cloudflare API token secret manifest
+  ansible.builtin.template:
+    src: "cloudflare-secret.yaml.j2"
+    dest: "{{ homelab_apps_dir }}/traefik/cloudflare-secret.yaml"
+    mode: "0600"
+  no_log: true
+
+- name: Apply Cloudflare API token secret
+  ansible.builtin.command:
+    cmd: >
+      {{ traefik_kubectl_command }} --kubeconfig {{ traefik_kubeconfig }}
+      apply -f {{ homelab_apps_dir }}/traefik/cloudflare-secret.yaml
+  no_log: true
+
 - name: Add Traefik Helm repo
   ansible.builtin.command:
     cmd: "{{ traefik_helm_command }} repo add {{ traefik_repo_name }} {{ traefik_repo_url }}"

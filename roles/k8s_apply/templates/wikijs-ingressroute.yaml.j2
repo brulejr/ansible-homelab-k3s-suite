@@ -19,3 +19,5 @@ spec:
       services:
         - name: wikijs
           port: 3000
+  tls:
+    certResolver: {{ traefik_acme_resolver_name }}

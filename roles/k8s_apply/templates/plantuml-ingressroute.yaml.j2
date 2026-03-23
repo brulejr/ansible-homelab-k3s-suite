@@ -19,3 +19,5 @@ spec:
       services:
         - name: plantuml
           port: 8080
+  tls:
+    certResolver: {{ traefik_acme_resolver_name }}

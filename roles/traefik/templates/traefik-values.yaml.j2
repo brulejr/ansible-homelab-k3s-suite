@@ -1,5 +1,12 @@
 deployment:
   replicas: 1
+  initContainers:
+  - name: volume-permissions
+    image: busybox:latest
+    command: ["sh", "-c", "touch /data/acme.json; chmod -v 600 /data/acme.json"]
+    volumeMounts:
+      - mountPath: /data
+        name: data
 
 ingressClass:
   enabled: true
@@ -39,3 +46,28 @@ api:
 additionalArguments:
   - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
   - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+
+persistence:
+  enabled: true
+  path: /data
+  size: 128Mi
+  storageClass: local-path
+
+certificatesResolvers:
+  {{ traefik_acme_resolver_name }}:
+    acme:
+      email: "{{ traefik_acme_email }}"
+      storage: "{{ traefik_acme_storage_path }}"
+      dnsChallenge:
+        provider: cloudflare
+
+env:
+  - name: CF_DNS_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare
+        key: token
+
+podSecurityContext:
+  fsGroup: 65532
+  fsGroupChangePolicy: "OnRootMismatch"
