@@ -7,8 +7,7 @@ deployment:
     volumeMounts:
       - mountPath: /data
         name: data
-
-  podDNSConfig:
+  dnsConfig:
     options:
       - name: ndots
         value: "1"
