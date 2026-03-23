@@ -8,6 +8,11 @@ deployment:
       - mountPath: /data
         name: data
 
+podDNSConfig:
+  options:
+    - name: ndots
+      value: "1"
+
 ingressClass:
   enabled: true
   isDefaultClass: true
