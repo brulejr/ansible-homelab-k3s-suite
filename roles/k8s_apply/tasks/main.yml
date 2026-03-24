@@ -52,10 +52,10 @@
     state: directory
     mode: "0755"
 
-- name: Render shared postgres secret into remote staged overlay
+- name: Render postgres secret into remote staged overlay
   ansible.builtin.template:
     src: "postgres-secret.yaml.j2"
-    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/apps-postgres-secret.yaml"
+    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/postgres-secret.yaml"
     mode: "0600"
   no_log: true
 
@@ -63,6 +63,13 @@
   ansible.builtin.template:
     src: "wikijs-secret.yaml.j2"
     dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/wikijs-secret.yaml"
+    mode: "0600"
+  no_log: true
+
+- name: Render Gitea secret into remote staged overlay
+  ansible.builtin.template:
+    src: "gitea-secret.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/gitea-secret.yaml"
     mode: "0600"
   no_log: true
 
