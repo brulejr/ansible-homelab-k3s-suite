@@ -21,6 +21,18 @@
       {{ lookup('ansible.builtin.password', wikijs_db_password_file ~ ' length=' ~ wikijs_db_password_length|string) }}
   no_log: true
 
+- name: Generate or read Postgres admin password from controller-local file
+  ansible.builtin.set_fact:
+    postgres_admin_password: >-
+      {{ lookup('ansible.builtin.password', postgres_admin_password_file ~ ' length=' ~ postgres_admin_password_length|string) }}
+  no_log: true
+
+- name: Generate or read Gitea DB password from controller-local file
+  ansible.builtin.set_fact:
+    gitea_db_password: >-
+      {{ lookup('ansible.builtin.password', gitea_db_password_file ~ ' length=' ~ gitea_db_password_length|string) }}
+  no_log: true
+
 - name: Ensure remote manifest staging directory exists
   ansible.builtin.file:
     path: "{{ k8s_remote_staging_dir }}"
@@ -40,10 +52,10 @@
     state: directory
     mode: "0755"
 
-- name: Render postgres secret into remote staged overlay
+- name: Render shared postgres secret into remote staged overlay
   ansible.builtin.template:
     src: "postgres-secret.yaml.j2"
-    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/postgres-secret.yaml"
+    dest: "{{ k8s_remote_staging_dir }}/overlays/{{ k8s_overlay_name }}/secrets/apps-postgres-secret.yaml"
     mode: "0600"
   no_log: true
 
