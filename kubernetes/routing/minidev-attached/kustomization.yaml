@@ -4,3 +4,5 @@ kind: Kustomization
 resources:
   - plantuml-ingressroute.yaml
   - wikijs-ingressroute.yaml
+  - gitea-ingressroute.yaml
+  - gitea-ssh-ingressroutetcp.yaml

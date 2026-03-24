@@ -85,6 +85,18 @@
     dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/wikijs-ingressroute.yaml"
     mode: "0644"
 
+- name: Render Gitea ingress route into remote staged routing
+  ansible.builtin.template:
+    src: "gitea-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/gitea-ingressroute.yaml"
+    mode: "0644"
+
+- name: Render Gitea SSH ingress route into remote staged routing
+  ansible.builtin.template:
+    src: "gitea-ssh-ingressroutetcp.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/gitea-ssh-ingressroutetcp.yaml"
+    mode: "0644"
+
 - name: Apply Kubernetes overlay
   ansible.builtin.command:
     cmd: >

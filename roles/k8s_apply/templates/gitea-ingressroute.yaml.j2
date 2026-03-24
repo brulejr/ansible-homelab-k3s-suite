@@ -17,7 +17,7 @@ spec:
         - name: default-security-headers
           namespace: traefik
       services:
-        - name: plantuml
-          port: 8080
+        - name: gitea
+          port: 3000
   tls:
     certResolver: {{ traefik_acme_resolver_name }}  
