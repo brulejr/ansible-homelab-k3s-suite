@@ -9,9 +9,16 @@ k8s_remote_staging_dir: "{{ homelab_apps_dir }}/k8s-manifests"
 
 k8s_apply_prune: false
 
-k8s_local_secret_dir: "{{ playbook_dir }}/.secrets/{{ k8s_overlay_name }}"
+k8s_local_secret_dir: "{{ playbook_dir }}/.secrets"
+
+postgres_admin_password_file: "{{ k8s_local_secret_dir }}/postgres_admin_password"
+postgres_admin_password_length: 32
+
 wikijs_db_password_file: "{{ k8s_local_secret_dir }}/wikijs_db_password"
-wikijs_db_password_length: 40
+wikijs_db_password_length: 32
+
+gitea_db_password_file: "{{ k8s_local_secret_dir }}/gitea_db_password"
+gitea_db_password_length: 32
 
 plantuml_hostname: ""
 wikijs_hostname: ""
