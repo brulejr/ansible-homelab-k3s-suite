@@ -1,0 +1,23 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gitea
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: gitea
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: routing  
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ gitea_hostname }}`)
+      kind: Rule
+      middlewares:
+        - name: default-security-headers
+          namespace: traefik
+      services:
+        - name: plantuml
+          port: 8080
+  tls:
+    certResolver: {{ traefik_acme_resolver_name }}  
