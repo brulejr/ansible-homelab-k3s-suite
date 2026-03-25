@@ -6,3 +6,4 @@ resources:
   - wikijs-ingressroute.yaml
   - gitea-ingressroute.yaml
   - gitea-ssh-ingressroutetcp.yaml
+  - openwebrx-ingressroute.yaml
