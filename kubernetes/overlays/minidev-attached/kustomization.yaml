@@ -6,7 +6,10 @@ resources:
   - ../../base/traefik
   - ../../base/plantuml
   - ../../base/mqtt
+  - ../../base/postgres-shared
   - ../../base/wikijs
+  - ../../base/gitea
   - ../../routing/minidev-attached
-  - secrets/postgres-secret.yaml
+  - secrets/apps-postgres-secret.yaml
   - secrets/wikijs-secret.yaml
+  - secrets/gitea-secret.yaml
