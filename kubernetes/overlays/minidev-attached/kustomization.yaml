@@ -9,6 +9,7 @@ resources:
   - ../../base/postgres-shared
   - ../../base/wikijs
   - ../../base/gitea
+  - ../../base/openwebrx
   - ../../routing/minidev-attached
   - secrets/apps-postgres-secret.yaml
   - secrets/wikijs-secret.yaml

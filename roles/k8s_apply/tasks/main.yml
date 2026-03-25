@@ -97,6 +97,12 @@
     dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/gitea-ssh-ingressroutetcp.yaml"
     mode: "0644"
 
+- name: Render OpenWebRX route into staged routing tree
+  ansible.builtin.template:
+    src: "openwebrx-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/openwebrx-ingressroute.yaml"
+    mode: "0644"
+
 - name: Apply Kubernetes overlay
   ansible.builtin.command:
     cmd: >

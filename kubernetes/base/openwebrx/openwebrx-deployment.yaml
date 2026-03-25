@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebrx
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: openwebrx
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openwebrx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openwebrx
+        app.kubernetes.io/part-of: minidev-platform
+        app.kubernetes.io/component: application
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: minisrv01
+      containers:
+        - name: openwebrx
+          image: jketterl/openwebrx:stable
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8073
+          env:
+            - name: TZ
+              value: America/New_York
+          volumeMounts:
+            - name: openwebrx-data
+              mountPath: /var/lib/openwebrx
+            - name: usb-bus
+              mountPath: /dev/bus/usb
+              readOnly: false
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: openwebrx-data
+          persistentVolumeClaim:
+            claimName: openwebrx-data
+        - name: usb-bus
+          hostPath:
+            path: /dev/bus/usb
+            type: Directory

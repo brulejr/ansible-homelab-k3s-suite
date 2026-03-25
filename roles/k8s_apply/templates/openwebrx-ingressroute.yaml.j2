@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: openwebrx
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ openwebrx_hostname }}`)
+      kind: Rule
+      services:
+        - name: openwebrx
+          port: 8073
+  tls:
+    certResolver: {{ traefik_acme_resolver_name }}
