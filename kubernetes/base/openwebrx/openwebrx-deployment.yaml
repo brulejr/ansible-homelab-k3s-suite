@@ -25,6 +25,8 @@ spec:
         - name: openwebrx
           image: jketterl/openwebrx:stable
           imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
           ports:
             - name: http
               containerPort: 8073
