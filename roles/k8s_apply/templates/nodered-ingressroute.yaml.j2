@@ -3,6 +3,10 @@ kind: IngressRoute
 metadata:
   name: nodered
   namespace: apps
+  labels:
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/part-of: minidev-platform
+    app.kubernetes.io/component: routing
 spec:
   entryPoints:
     - websecure
