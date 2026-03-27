@@ -15,3 +15,5 @@ spec:
       services:
         - name: nodered
           port: 1880
+  tls:
+    certResolver: {{ traefik_acme_resolver_name }}
