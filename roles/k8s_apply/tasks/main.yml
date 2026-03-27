@@ -5,7 +5,8 @@
       - k8s_overlay_name | length > 0
       - plantuml_hostname | length > 0
       - wikijs_hostname | length > 0
-    fail_msg: "k8s_overlay_name, plantuml_hostname, and wikijs_hostname are required."
+      - nodered_hostname | length > 0
+    fail_msg: "k8s_overlay_name, plantuml_hostname, wikijs_hostname, and nodered_hostname are required."
 
 - name: Ensure local secret directory exists on controller
   ansible.builtin.file:
