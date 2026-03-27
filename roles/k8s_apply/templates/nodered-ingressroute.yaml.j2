@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nodered
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ nodered_hostname }}`)
+      kind: Rule
+      middlewares:
+        - name: default-security-headers
+          namespace: traefik
+      services:
+        - name: nodered
+          port: 1880

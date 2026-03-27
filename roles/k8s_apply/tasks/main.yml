@@ -103,6 +103,12 @@
     dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/openwebrx-ingressroute.yaml"
     mode: "0644"
 
+- name: Render Node-RED route into staged routing tree
+  ansible.builtin.template:
+    src: "nodered-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/nodered-ingressroute.yaml"
+    mode: "0644"
+
 - name: Apply Kubernetes overlay
   ansible.builtin.command:
     cmd: >
