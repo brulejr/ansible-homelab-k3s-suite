@@ -17,7 +17,7 @@ spec:
         - name: default-security-headers
           namespace: traefik
       services:
-        - name: vmks-grafana
+        - name: victoria-metrics-k8s-stack-grafana
           port: 80
   tls:
     certResolver: {{ traefik_acme_resolver_name }}
