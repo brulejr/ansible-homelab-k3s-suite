@@ -47,6 +47,8 @@ vmalert:
   enabled: true
   spec:
     replicaCount: 1
+    extraArgs:
+      notifier.blackhole: "true"
 
 alertmanager:
   enabled: false
