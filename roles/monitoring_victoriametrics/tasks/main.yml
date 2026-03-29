@@ -1,0 +1,64 @@
+---
+- name: Ensure monitoring working directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_work_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure monitoring namespace exists
+  ansible.builtin.command:
+    cmd: "{{ monitoring_kubectl_command }} --kubeconfig {{ monitoring_kubeconfig }} create namespace {{ monitoring_namespace }}"
+  register: monitoring_namespace_create
+  changed_when: "'created' in monitoring_namespace_create.stdout"
+  failed_when: >
+    monitoring_namespace_create.rc != 0 and
+    'AlreadyExists' not in monitoring_namespace_create.stderr
+
+- name: Generate or read Grafana admin password from controller-local file
+  ansible.builtin.set_fact:
+    monitoring_grafana_admin_password: >-
+      {{ lookup('ansible.builtin.password',
+                monitoring_grafana_admin_password_file ~
+                ' length=' ~ monitoring_grafana_admin_password_length|string) }}
+  no_log: true
+
+- name: Add VictoriaMetrics Helm repo
+  ansible.builtin.command:
+    cmd: "{{ monitoring_helm_command }} repo add {{ monitoring_repo_name }} {{ monitoring_repo_url }}"
+  register: monitoring_repo_add
+  changed_when: "'has been added' in monitoring_repo_add.stdout or 'already exists' not in monitoring_repo_add.stderr"
+  failed_when: >
+    monitoring_repo_add.rc != 0 and
+    'already exists' not in monitoring_repo_add.stderr
+
+- name: Update Helm repos
+  ansible.builtin.command:
+    cmd: "{{ monitoring_helm_command }} repo update"
+  changed_when: false
+
+- name: Render VictoriaMetrics Helm values
+  ansible.builtin.template:
+    src: "victoria-metrics-values.yaml.j2"
+    dest: "{{ monitoring_values_file }}"
+    mode: "0600"
+  no_log: true
+
+- name: Install or upgrade VictoriaMetrics K8s Stack
+  ansible.builtin.command:
+    cmd: >-
+      {{ monitoring_helm_command }} upgrade --install
+      {{ monitoring_release_name }}
+      {{ monitoring_chart_ref }}
+      --namespace {{ monitoring_namespace }}
+      --version {{ monitoring_chart_version }}
+      --kubeconfig {{ monitoring_kubeconfig }}
+      --values {{ monitoring_values_file }}
+      --wait
+  register: monitoring_helm_result
+  changed_when: >
+    'has been upgraded' in monitoring_helm_result.stdout or
+    'has been installed' in monitoring_helm_result.stdout
+
+- name: Show VictoriaMetrics Helm output
+  ansible.builtin.debug:
+    var: monitoring_helm_result.stdout_lines

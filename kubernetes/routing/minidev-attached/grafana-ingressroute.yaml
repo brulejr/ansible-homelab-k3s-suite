@@ -1,0 +1,19 @@
+# Placeholder only.
+# This file is overwritten during Ansible staging by roles/k8s_apply.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: apps
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`__RENDERED_BY_ANSIBLE__`)
+      kind: Rule
+      middlewares:
+        - name: default-security-headers
+          namespace: traefik
+      services:
+        - name: grafana
+          port: 80

@@ -7,3 +7,5 @@ resources:
   - gitea-ingressroute.yaml
   - gitea-ssh-ingressroutetcp.yaml
   - openwebrx-ingressroute.yaml
+  - nodered-ingressroute.yaml
+  - grafana-ingressroute.yaml
