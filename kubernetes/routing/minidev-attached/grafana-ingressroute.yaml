@@ -1,23 +1,19 @@
+# Placeholder only.
+# This file is overwritten during Ansible staging by roles/k8s_apply.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: grafana
-  namespace: monitoring
-  labels:
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/part-of: minidev-platform
-    app.kubernetes.io/component: routing
+  namespace: apps
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`{{ grafana_hostname }}`)
+    - match: Host(`__RENDERED_BY_ANSIBLE__`)
       kind: Rule
       middlewares:
         - name: default-security-headers
           namespace: traefik
       services:
-        - name: vmks-grafana
+        - name: grafana
           port: 80
-  tls:
-    certResolver: { { traefik_acme_resolver_name } }
