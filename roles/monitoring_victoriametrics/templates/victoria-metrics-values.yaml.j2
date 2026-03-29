@@ -1,0 +1,52 @@
+fullnameOverride: vmks
+
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  adminPassword: "{{ monitoring_grafana_admin_password }}"
+  persistence:
+    enabled: true
+    size: {{ monitoring_grafana_storage_size }}
+    accessModes:
+      - ReadWriteOnce
+  ingress:
+    enabled: false
+
+kube-state-metrics:
+  enabled: true
+
+prometheus-node-exporter:
+  enabled: true
+
+victoria-metrics-operator:
+  enabled: true
+
+defaultRules:
+  create: true
+
+vmsingle:
+  enabled: true
+  spec:
+    retentionPeriod: "{{ monitoring_vmsingle_retention }}"
+    replicaCount: 1
+    storage:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ monitoring_vmsingle_storage_size }}
+
+vmagent:
+  enabled: true
+  spec:
+    replicaCount: 1
+    selectAllByDefault: true
+    scrapeInterval: "30s"
+
+vmalert:
+  enabled: true
+  spec:
+    replicaCount: 1
+
+alertmanager:
+  enabled: false

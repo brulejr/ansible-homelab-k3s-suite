@@ -1,0 +1,26 @@
+---
+monitoring_enabled: true
+
+monitoring_namespace: monitoring
+
+monitoring_helm_command: helm
+monitoring_kubectl_command: k3s kubectl
+monitoring_kubeconfig: /etc/rancher/k3s/k3s.yaml
+
+monitoring_repo_name: victoriametrics
+monitoring_repo_url: https://victoriametrics.github.io/helm-charts/
+monitoring_chart_ref: victoriametrics/victoria-metrics-k8s-stack
+monitoring_chart_version: "0.61.4"
+
+monitoring_release_name: victoria-metrics-k8s-stack
+monitoring_work_dir: "{{ homelab_apps_dir }}/monitoring-victoriametrics"
+monitoring_values_file: "{{ monitoring_work_dir }}/values-attached.yaml"
+
+monitoring_grafana_admin_password_file: "{{ k8s_local_secret_dir }}/grafana-admin-password"
+monitoring_grafana_admin_password_length: 24
+
+monitoring_vmsingle_retention: "14d"
+monitoring_vmsingle_storage_size: "20Gi"
+monitoring_grafana_storage_size: "5Gi"
+
+grafana_hostname: "grafana.lab.brulenet.dev"

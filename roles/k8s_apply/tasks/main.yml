@@ -6,7 +6,8 @@
       - plantuml_hostname | length > 0
       - wikijs_hostname | length > 0
       - nodered_hostname | length > 0
-    fail_msg: "k8s_overlay_name, plantuml_hostname, wikijs_hostname, and nodered_hostname are required."
+      - grafana_hostname | length > 0
+    fail_msg: "k8s_overlay_name, plantuml_hostname, wikijs_hostname, nodered_hostname, and grafana_hostname are required."
 
 - name: Ensure local secret directory exists on controller
   ansible.builtin.file:
@@ -108,6 +109,12 @@
   ansible.builtin.template:
     src: "nodered-ingressroute.yaml.j2"
     dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/nodered-ingressroute.yaml"
+    mode: "0644"
+
+- name: Render Grafana route into staged routing tree
+  ansible.builtin.template:
+    src: "grafana-ingressroute.yaml.j2"
+    dest: "{{ k8s_remote_staging_dir }}/routing/{{ k8s_overlay_name }}/grafana-ingressroute.yaml"
     mode: "0644"
 
 - name: Apply Kubernetes overlay

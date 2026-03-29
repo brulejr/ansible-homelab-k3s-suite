@@ -14,4 +14,5 @@
     - storage_prep
     - k3s_server
     - traefik
+    - monitoring_victoriametrics
     - k8s_apply
