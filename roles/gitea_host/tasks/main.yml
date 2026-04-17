@@ -1,0 +1,28 @@
+
+---
+- name: Skip gitea_host when disabled
+  ansible.builtin.meta: end_role
+  when: not gitea_host_enabled | bool
+
+- name: Show intended gitea_host configuration
+  ansible.builtin.debug:
+    msg:
+      - "Would install host-level Gitea"
+      - "Domain: {{ gitea_host_domain }}"
+      - "HTTP port: {{ gitea_host_http_port }}"
+      - "SSH port: {{ gitea_host_ssh_port }}"
+
+- name: Create future installation directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ gitea_host_install_dir }}"
+    - "{{ gitea_host_data_dir }}"
+    - "{{ gitea_host_config_dir }}"
+
+- name: Placeholder for package install and binary deployment
+  ansible.builtin.debug:
+    msg: "TODO: install Gitea binary, systemd unit, app.ini, and bootstrap admin"
+

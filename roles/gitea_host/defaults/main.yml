@@ -1,0 +1,17 @@
+
+---
+gitea_host_enabled: true
+gitea_host_user: git
+gitea_host_group: git
+gitea_host_install_dir: /opt/gitea
+gitea_host_data_dir: /var/lib/gitea
+gitea_host_config_dir: /etc/gitea
+gitea_host_http_port: 3000
+gitea_host_ssh_port: 2222
+gitea_host_domain: gitea.lab.example.com
+gitea_host_root_url: "https://{{ gitea_host_domain }}/"
+gitea_host_db_type: sqlite3
+gitea_host_admin_username: gitea_admin
+gitea_host_admin_password: ""
+gitea_host_secret_key: ""
+

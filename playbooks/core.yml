@@ -1,0 +1,6 @@
+---
+- name: Cluster core middleware
+  hosts: k3s_servers
+  become: true
+  roles:
+    - role: traefik

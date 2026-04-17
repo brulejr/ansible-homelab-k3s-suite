@@ -1,0 +1,7 @@
+---
+- name: Cluster applications
+  hosts: k3s_servers
+  become: true
+  roles:
+    - role: plantuml
+    - role: mqtt

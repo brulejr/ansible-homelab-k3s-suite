@@ -1,0 +1,15 @@
+
+---
+traefik_enabled: true
+traefik_namespace: traefik
+traefik_service_type: LoadBalancer
+traefik_dashboard_enabled: false
+traefik_dashboard_hostname: ""
+traefik_acme_enabled: true
+traefik_acme_email: ""
+traefik_acme_server: https://acme-v02.api.letsencrypt.org/directory
+traefik_chart_version: ""
+traefik_entrypoints:
+  web: 80
+  websecure: 443
+

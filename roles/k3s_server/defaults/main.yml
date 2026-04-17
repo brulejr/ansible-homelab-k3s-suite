@@ -1,0 +1,11 @@
+
+---
+k3s_server_enabled: true
+k3s_server_version: ""
+k3s_server_cluster_init: true
+k3s_server_token: ""
+k3s_server_write_kubeconfig_mode: "0644"
+k3s_server_disable_traefik: true
+k3s_server_tls_sans: []
+k3s_server_extra_args: []
+

@@ -1,0 +1,16 @@
+
+---
+mqtt_enabled: true
+mqtt_namespace: apps
+mqtt_app_name: mqtt
+mqtt_hostname: mqtt.lab.example.com
+mqtt_image: eclipse-mosquitto:2
+mqtt_service_port: 1883
+mqtt_websocket_enabled: false
+mqtt_websocket_port: 9001
+mqtt_ingress_enabled: false
+mqtt_ingress_class_name: traefik
+mqtt_storage_enabled: true
+mqtt_storage_class: local-path
+mqtt_persistence_size: 1Gi
+

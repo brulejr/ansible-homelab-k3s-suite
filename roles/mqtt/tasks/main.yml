@@ -1,0 +1,17 @@
+
+---
+- name: Skip mqtt when disabled
+  ansible.builtin.meta: end_role
+  when: not mqtt_enabled | bool
+
+- name: Display intended MQTT deployment
+  ansible.builtin.debug:
+    msg:
+      - "Would deploy MQTT broker in namespace {{ mqtt_namespace }}"
+      - "TCP port: {{ mqtt_service_port }}"
+      - "WebSocket enabled: {{ mqtt_websocket_enabled }}"
+
+- name: Placeholder for MQTT namespace, config, deployment, service, pvc, and optional ingressroute
+  ansible.builtin.debug:
+    msg: "TODO: render and apply MQTT manifests"
+

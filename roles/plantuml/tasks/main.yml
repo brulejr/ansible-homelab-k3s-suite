@@ -1,0 +1,24 @@
+
+---
+- name: Skip plantuml when disabled
+  ansible.builtin.meta: end_role
+  when: not plantuml_enabled | bool
+
+- name: Validate plantuml hostname when ingress is enabled
+  ansible.builtin.assert:
+    that:
+      - plantuml_hostname | length > 0
+    fail_msg: "plantuml_hostname must be set when plantuml_ingress_enabled is true"
+  when: plantuml_ingress_enabled | bool
+
+- name: Display intended PlantUML deployment
+  ansible.builtin.debug:
+    msg:
+      - "Would deploy PlantUML in namespace {{ plantuml_namespace }}"
+      - "Hostname: {{ plantuml_hostname }}"
+      - "Ingress class: {{ plantuml_ingress_class_name }}"
+
+- name: Placeholder for PlantUML namespace, deployment, service, and ingressroute
+  ansible.builtin.debug:
+    msg: "TODO: render and apply PlantUML manifests"
+

@@ -1,0 +1,17 @@
+
+---
+- name: Skip traefik when disabled
+  ansible.builtin.meta: end_role
+  when: not traefik_enabled | bool
+
+- name: Display intended Traefik settings
+  ansible.builtin.debug:
+    msg:
+      - "Would deploy Traefik into namespace {{ traefik_namespace }}"
+      - "Service type: {{ traefik_service_type }}"
+      - "ACME enabled: {{ traefik_acme_enabled }}"
+
+- name: Placeholder for namespace, Helm values, and release deployment
+  ansible.builtin.debug:
+    msg: "TODO: deploy Traefik chart and shared middleware resources"
+

@@ -1,0 +1,17 @@
+
+---
+- name: Skip k3s_server when disabled
+  ansible.builtin.meta: end_role
+  when: not k3s_server_enabled | bool
+
+- name: Display intended K3S server settings
+  ansible.builtin.debug:
+    msg:
+      - "Would install K3S server"
+      - "Cluster init: {{ k3s_server_cluster_init }}"
+      - "Disable packaged Traefik: {{ k3s_server_disable_traefik }}"
+
+- name: Placeholder for K3S prerequisites
+  ansible.builtin.debug:
+    msg: "TODO: configure host prerequisites and install K3S server"
+

@@ -1,0 +1,13 @@
+
+---
+plantuml_enabled: true
+plantuml_namespace: apps
+plantuml_app_name: plantuml
+plantuml_hostname: plantuml.lab.example.com
+plantuml_image: plantuml/plantuml-server:jetty
+plantuml_service_port: 8080
+plantuml_ingress_enabled: true
+plantuml_ingress_class_name: traefik
+plantuml_storage_enabled: false
+plantuml_storage_class: ""
+

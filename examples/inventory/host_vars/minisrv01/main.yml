@@ -1,0 +1,5 @@
+---
+k3s_server_enabled: true
+traefik_enabled: true
+plantuml_enabled: true
+mqtt_enabled: true

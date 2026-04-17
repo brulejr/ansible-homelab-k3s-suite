@@ -1,0 +1,6 @@
+---
+- name: Host foundation
+  hosts: gitea_hosts
+  become: true
+  roles:
+    - role: gitea_host
