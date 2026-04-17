@@ -2,5 +2,8 @@
 - name: K3S servers
   hosts: k3s_servers
   become: true
-  roles:
-    - role: k3s_server
+  tasks:
+    - name: Include cluster bootstrap roles
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop: "{{ cluster_bootstrap_roles | default([]) }}"

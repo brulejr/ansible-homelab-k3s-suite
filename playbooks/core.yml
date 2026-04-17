@@ -2,5 +2,8 @@
 - name: Cluster core middleware
   hosts: k3s_servers
   become: true
-  roles:
-    - role: traefik
+  tasks:
+    - name: Include cluster core roles
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop: "{{ cluster_core_roles | default([]) }}"
