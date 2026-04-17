@@ -11,7 +11,9 @@ This public repository provides:
 
 ## Manifest-driven orchestration
 
-The suite playbooks are generic and manifest-driven. The consuming inventory repository supplies the ordered role manifests, for example:
+The suite playbooks are generic and manifest-driven.
+
+The consuming inventory repository supplies the ordered role manifests, for example:
 
 - `host_foundation_roles`
 - `cluster_bootstrap_roles`
@@ -54,6 +56,14 @@ This keeps orchestration reusable while preserving site-specific intent in the p
 4. Cluster middleware
 5. Cluster applications
 
-## Notes
+## Current implementation status
 
-These roles are intentionally shells. They provide structure, variable contracts, and task flow, but not a complete production implementation yet.
+These roles now provide:
+
+- role-specific defaults contracts
+- structured task flow using `validate.yml`, `install.yml`, and `verify.yml`
+- host and cluster verification steps
+- manifest-driven suite playbooks
+- example inventory contract for manifest consumption
+
+They are intended as a strong reusable suite baseline for continued incremental expansion rather than a fully production-hardened distribution.
