@@ -4,13 +4,11 @@ gitea_host_enabled: true
 gitea_host_user: git
 gitea_host_group: git
 
-# Preserve existing path contract
 gitea_host_install_dir: /opt/gitea
 gitea_host_data_dir: /var/lib/gitea
 gitea_host_config_dir: /etc/gitea
 gitea_host_log_dir: /var/log/gitea
 
-# Binary/runtime details
 gitea_host_version: "1.24.6"
 gitea_host_arch: amd64
 gitea_host_binary_name: gitea
@@ -18,7 +16,6 @@ gitea_host_binary_path: "{{ gitea_host_install_dir }}/gitea"
 gitea_host_download_base_url: "https://dl.gitea.com/gitea"
 gitea_host_download_url: "{{ gitea_host_download_base_url }}/{{ gitea_host_version }}/gitea-{{ gitea_host_version }}-linux-{{ gitea_host_arch }}"
 
-# Network contract
 gitea_host_http_listen: "0.0.0.0"
 gitea_host_http_port: 3000
 gitea_host_ssh_listen: "0.0.0.0"
@@ -26,25 +23,21 @@ gitea_host_ssh_port: 2222
 gitea_host_domain: gitea.lab.example.com
 gitea_host_root_url: "https://{{ gitea_host_domain }}/"
 
-# Database contract
 gitea_host_db_type: sqlite3
 gitea_host_db_host: ""
 gitea_host_db_name: gitea
 gitea_host_db_user: gitea
 gitea_host_db_password: ""
 
-# Admin/bootstrap contract
 gitea_host_admin_username: gitea_admin
 gitea_host_admin_password: ""
 gitea_host_admin_email: "admin@{{ gitea_host_domain | regex_replace('^[^.]+\\.', '') }}"
 gitea_host_secret_key: ""
 
-# Service contract
 gitea_host_service_name: gitea
 gitea_host_run_user: "{{ gitea_host_user }}"
 gitea_host_run_group: "{{ gitea_host_group }}"
 
-# Optional package prerequisites
 gitea_host_prerequisite_packages:
   - git
   - curl
