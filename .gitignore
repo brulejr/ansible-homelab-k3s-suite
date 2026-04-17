@@ -1,0 +1,28 @@
+# Python / Ansible
+*.retry
+__pycache__/
+*.pyc
+
+# Local virtualenvs
+.venv/
+venv/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local test / temp output
+tmp/
+temp/
+*.log
+
+# Ansible / Molecule local artifacts
+.molecule/
+.cache/
