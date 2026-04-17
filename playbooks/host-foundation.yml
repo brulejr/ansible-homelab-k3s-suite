@@ -3,7 +3,14 @@
   hosts: gitea_hosts
   become: true
   tasks:
+    - name: Assert host foundation manifest is defined
+      ansible.builtin.assert:
+        that:
+          - host_foundation_roles is defined
+          - host_foundation_roles is iterable
+        fail_msg: "host_foundation_roles must be defined by the inventory"
+
     - name: Include host foundation roles
       ansible.builtin.include_role:
         name: "{{ item }}"
-      loop: "{{ host_foundation_roles | default([]) }}"
+      loop: "{{ host_foundation_roles }}"

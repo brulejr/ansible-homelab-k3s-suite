@@ -1,9 +1,16 @@
 ---
-- name: K3S servers
+- name: Cluster bootstrap
   hosts: k3s_servers
   become: true
   tasks:
+    - name: Assert cluster bootstrap manifest is defined
+      ansible.builtin.assert:
+        that:
+          - cluster_bootstrap_roles is defined
+          - cluster_bootstrap_roles is iterable
+        fail_msg: "cluster_bootstrap_roles must be defined by the inventory"
+
     - name: Include cluster bootstrap roles
       ansible.builtin.include_role:
         name: "{{ item }}"
-      loop: "{{ cluster_bootstrap_roles | default([]) }}"
+      loop: "{{ cluster_bootstrap_roles }}"

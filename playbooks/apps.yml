@@ -3,7 +3,14 @@
   hosts: k3s_servers
   become: true
   tasks:
+    - name: Assert cluster app manifest is defined
+      ansible.builtin.assert:
+        that:
+          - cluster_app_roles is defined
+          - cluster_app_roles is iterable
+        fail_msg: "cluster_app_roles must be defined by the inventory"
+
     - name: Include cluster application roles
       ansible.builtin.include_role:
         name: "{{ item }}"
-      loop: "{{ cluster_app_roles | default([]) }}"
+      loop: "{{ cluster_app_roles }}"
