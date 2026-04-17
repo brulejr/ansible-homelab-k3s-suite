@@ -24,8 +24,8 @@
       - plantuml_service_port | int < 65536
     fail_msg: "plantuml_service_port must be a valid TCP port"
 
-- name: Assert PlantUML storage class is set when storage enabled
+- name: Assert PlantUML storage class is set when persistence enabled
   ansible.builtin.assert:
     that:
-      - not plantuml_storage_enabled or (plantuml_storage_class | length > 0)
-    fail_msg: "plantuml_storage_class must be defined when plantuml_storage_enabled is true"
+      - not plantuml_persistence_enabled or (plantuml_storage_class | length > 0)
+    fail_msg: "plantuml_storage_class must be defined when plantuml_persistence_enabled is true"

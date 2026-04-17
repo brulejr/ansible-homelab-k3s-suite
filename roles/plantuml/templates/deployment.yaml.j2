@@ -18,12 +18,12 @@ spec:
           image: {{ plantuml_image }}
           ports:
             - containerPort: {{ plantuml_container_port }}
-{% if plantuml_storage_enabled %}
+{% if plantuml_persistence_enabled %}
           volumeMounts:
             - name: data
               mountPath: /data
 {% endif %}
-{% if plantuml_storage_enabled %}
+{% if plantuml_persistence_enabled %}
       volumes:
         - name: data
           persistentVolumeClaim:

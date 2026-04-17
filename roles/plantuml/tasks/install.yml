@@ -19,13 +19,13 @@
     owner: root
     group: root
     mode: "0644"
-  when: plantuml_storage_enabled | bool
+  when: plantuml_persistence_enabled | bool
 
 - name: Apply PlantUML PVC manifest
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ plantuml_app_name }}-pvc.yaml
   changed_when: false
-  when: plantuml_storage_enabled | bool
+  when: plantuml_persistence_enabled | bool
 
 - name: Render PlantUML deployment manifest
   ansible.builtin.template:
