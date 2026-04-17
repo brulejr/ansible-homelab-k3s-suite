@@ -1,0 +1,86 @@
+---
+- name: Render MQTT namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MQTT namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render MQTT configmap manifest
+  ansible.builtin.template:
+    src: configmap.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-configmap.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MQTT configmap manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-configmap.yaml
+  changed_when: false
+
+- name: Render MQTT PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: mqtt_persistence_enabled | bool
+
+- name: Apply MQTT PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-pvc.yaml
+  changed_when: false
+  when: mqtt_persistence_enabled | bool
+
+- name: Render MQTT deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MQTT deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render MQTT service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MQTT service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-service.yaml
+  changed_when: false
+
+- name: Render MQTT IngressRoute manifest
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/{{ mqtt_app_name }}-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - mqtt_ingress_enabled | bool
+    - mqtt_websocket_enabled | bool
+
+- name: Apply MQTT IngressRoute manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mqtt_app_name }}-ingressroute.yaml
+  changed_when: false
+  when:
+    - mqtt_ingress_enabled | bool
+    - mqtt_websocket_enabled | bool

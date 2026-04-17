@@ -1,0 +1,37 @@
+---
+- name: Assert MQTT namespace is defined
+  ansible.builtin.assert:
+    that:
+      - mqtt_namespace | length > 0
+    fail_msg: "mqtt_namespace must be defined"
+
+- name: Assert MQTT replicas is valid
+  ansible.builtin.assert:
+    that:
+      - mqtt_replicas | int > 0
+    fail_msg: "mqtt_replicas must be greater than 0"
+
+- name: Assert MQTT service port is valid
+  ansible.builtin.assert:
+    that:
+      - mqtt_service_port | int > 0
+      - mqtt_service_port | int < 65536
+    fail_msg: "mqtt_service_port must be a valid TCP port"
+
+- name: Assert MQTT websocket port is valid when enabled
+  ansible.builtin.assert:
+    that:
+      - not mqtt_websocket_enabled or (mqtt_websocket_port | int > 0 and mqtt_websocket_port | int < 65536)
+    fail_msg: "mqtt_websocket_port must be a valid TCP port when mqtt_websocket_enabled is true"
+
+- name: Assert MQTT hostname is defined when ingress enabled
+  ansible.builtin.assert:
+    that:
+      - not mqtt_ingress_enabled or (mqtt_hostname | length > 0)
+    fail_msg: "mqtt_hostname must be defined when mqtt_ingress_enabled is true"
+
+- name: Assert MQTT storage class is set when persistence enabled
+  ansible.builtin.assert:
+    that:
+      - not mqtt_persistence_enabled or (mqtt_storage_class | length > 0)
+    fail_msg: "mqtt_storage_class must be defined when mqtt_persistence_enabled is true"

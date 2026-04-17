@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ mqtt_app_name }}
+  namespace: {{ mqtt_namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ mqtt_hostname }}`)
+      kind: Rule
+{% if mqtt_ingress_middlewares | length > 0 %}
+      middlewares:
+{% for middleware in mqtt_ingress_middlewares %}
+        - name: {{ middleware }}
+{% endfor %}
+{% endif %}
+      services:
+        - name: {{ mqtt_app_name }}
+          port: {{ mqtt_websocket_port }}
+{% if mqtt_tls_enabled %}
+  tls:
+    certResolver: {{ mqtt_tls_cert_resolver }}
+{% endif %}

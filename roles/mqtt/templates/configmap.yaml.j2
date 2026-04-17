@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ mqtt_app_name }}
+  namespace: {{ mqtt_namespace }}
+data:
+  mosquitto.conf: |
+    persistence true
+    persistence_location {{ mqtt_data_mount_path }}/
+    log_dest stdout
+    listener {{ mqtt_service_port }}
+    protocol mqtt
+{% if mqtt_websocket_enabled %}
+    listener {{ mqtt_websocket_port }}
+    protocol websockets
+{% endif %}

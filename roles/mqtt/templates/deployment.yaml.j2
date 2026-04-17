@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ mqtt_app_name }}
+  namespace: {{ mqtt_namespace }}
+spec:
+  replicas: {{ mqtt_replicas }}
+  selector:
+    matchLabels:
+      app: {{ mqtt_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ mqtt_app_name }}
+    spec:
+      containers:
+        - name: {{ mqtt_app_name }}
+          image: {{ mqtt_image }}
+          ports:
+            - containerPort: {{ mqtt_container_port }}
+{% if mqtt_websocket_enabled %}
+            - containerPort: {{ mqtt_websocket_container_port }}
+{% endif %}
+          volumeMounts:
+            - name: config
+              mountPath: {{ mqtt_config_path }}
+              subPath: mosquitto.conf
+{% if mqtt_persistence_enabled %}
+            - name: data
+              mountPath: {{ mqtt_data_mount_path }}
+            - name: data
+              mountPath: {{ mqtt_log_mount_path }}
+{% endif %}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ mqtt_app_name }}
+{% if mqtt_persistence_enabled %}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ mqtt_app_name }}
+{% endif %}

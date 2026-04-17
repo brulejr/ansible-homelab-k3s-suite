@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ mqtt_app_name }}
+  namespace: {{ mqtt_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ mqtt_storage_size }}
+  storageClassName: {{ mqtt_storage_class }}
