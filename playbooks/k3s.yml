@@ -10,6 +10,20 @@
           - cluster_bootstrap_roles is iterable
         fail_msg: "cluster_bootstrap_roles must be defined by the inventory"
 
+    - name: Assert cluster bootstrap manifest entries are valid role names
+      ansible.builtin.assert:
+        that:
+          - item is string
+          - item | trim | length > 0
+        fail_msg: "Each cluster_bootstrap_roles entry must be a non-empty role name"
+      loop: "{{ cluster_bootstrap_roles }}"
+
+    - name: Assert cluster bootstrap manifest has no duplicates
+      ansible.builtin.assert:
+        that:
+          - cluster_bootstrap_roles | unique | length == cluster_bootstrap_roles | length
+        fail_msg: "cluster_bootstrap_roles contains duplicate entries"
+
     - name: Include cluster bootstrap roles
       ansible.builtin.include_role:
         name: "{{ item }}"

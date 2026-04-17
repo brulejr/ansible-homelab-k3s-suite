@@ -10,6 +10,20 @@
           - cluster_core_roles is iterable
         fail_msg: "cluster_core_roles must be defined by the inventory"
 
+    - name: Assert cluster core manifest entries are valid role names
+      ansible.builtin.assert:
+        that:
+          - item is string
+          - item | trim | length > 0
+        fail_msg: "Each cluster_core_roles entry must be a non-empty role name"
+      loop: "{{ cluster_core_roles }}"
+
+    - name: Assert cluster core manifest has no duplicates
+      ansible.builtin.assert:
+        that:
+          - cluster_core_roles | unique | length == cluster_core_roles | length
+        fail_msg: "cluster_core_roles contains duplicate entries"
+
     - name: Include cluster core roles
       ansible.builtin.include_role:
         name: "{{ item }}"

@@ -10,6 +10,20 @@
           - host_foundation_roles is iterable
         fail_msg: "host_foundation_roles must be defined by the inventory"
 
+    - name: Assert host foundation manifest entries are valid role names
+      ansible.builtin.assert:
+        that:
+          - item is string
+          - item | trim | length > 0
+        fail_msg: "Each host_foundation_roles entry must be a non-empty role name"
+      loop: "{{ host_foundation_roles }}"
+
+    - name: Assert host foundation manifest has no duplicates
+      ansible.builtin.assert:
+        that:
+          - host_foundation_roles | unique | length == host_foundation_roles | length
+        fail_msg: "host_foundation_roles contains duplicate entries"
+
     - name: Include host foundation roles
       ansible.builtin.include_role:
         name: "{{ item }}"
