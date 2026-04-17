@@ -56,7 +56,7 @@ This keeps orchestration reusable while preserving site-specific intent in the p
 4. Cluster middleware
 5. Cluster applications
 
-## Current implementation status
+## Notes
 
 These roles now provide:
 
@@ -66,4 +66,4 @@ These roles now provide:
 - manifest-driven suite playbooks
 - example inventory contract for manifest consumption
 
-They are intended as a strong reusable suite baseline for continued incremental expansion rather than a fully production-hardened distribution.
+They are intended as a reusable suite baseline for continued incremental expansion rather than a fully production-hardened distribution.
