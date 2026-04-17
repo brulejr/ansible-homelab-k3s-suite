@@ -1,27 +1,32 @@
 ---
 traefik_enabled: true
 
+# Release
 traefik_namespace: traefik
+traefik_release_name: traefik
 traefik_chart_name: traefik
 traefik_chart_repo_name: traefik
 traefik_chart_repo_url: https://traefik.github.io/charts
 traefik_chart_version: ""
-
-traefik_release_name: traefik
 traefik_create_namespace: true
 
+# Service and ingress
 traefik_ingress_class_name: traefik
 traefik_service_type: LoadBalancer
 
+# Dashboard
 traefik_dashboard_enabled: false
 traefik_dashboard_hostname: ""
 
+# ACME / TLS
 traefik_acme_enabled: true
 traefik_acme_email: ""
 traefik_acme_ca_server: https://acme-v02.api.letsencrypt.org/directory
 traefik_acme_storage_path: /data/acme.json
 
+# Runtime
 traefik_values_file: /tmp/traefik-values.yaml
 
+# Host prerequisites
 traefik_prerequisite_packages:
   - helm
