@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ plantuml_app_name }}
+  namespace: {{ plantuml_namespace }}
+spec:
+  replicas: {{ plantuml_replicas }}
+  selector:
+    matchLabels:
+      app: {{ plantuml_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ plantuml_app_name }}
+    spec:
+      containers:
+        - name: {{ plantuml_app_name }}
+          image: {{ plantuml_image }}
+          ports:
+            - containerPort: {{ plantuml_container_port }}
+{% if plantuml_storage_enabled %}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+{% endif %}
+{% if plantuml_storage_enabled %}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ plantuml_app_name }}
+{% endif %}

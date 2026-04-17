@@ -1,0 +1,31 @@
+---
+- name: Assert PlantUML namespace is defined
+  ansible.builtin.assert:
+    that:
+      - plantuml_namespace | length > 0
+    fail_msg: "plantuml_namespace must be defined"
+
+- name: Assert PlantUML hostname is defined when ingress enabled
+  ansible.builtin.assert:
+    that:
+      - not plantuml_ingress_enabled or (plantuml_hostname | length > 0)
+    fail_msg: "plantuml_hostname must be defined when plantuml_ingress_enabled is true"
+
+- name: Assert PlantUML replicas is valid
+  ansible.builtin.assert:
+    that:
+      - plantuml_replicas | int > 0
+    fail_msg: "plantuml_replicas must be greater than 0"
+
+- name: Assert PlantUML service port is valid
+  ansible.builtin.assert:
+    that:
+      - plantuml_service_port | int > 0
+      - plantuml_service_port | int < 65536
+    fail_msg: "plantuml_service_port must be a valid TCP port"
+
+- name: Assert PlantUML storage class is set when storage enabled
+  ansible.builtin.assert:
+    that:
+      - not plantuml_storage_enabled or (plantuml_storage_class | length > 0)
+    fail_msg: "plantuml_storage_class must be defined when plantuml_storage_enabled is true"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ plantuml_app_name }}
+  namespace: {{ plantuml_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ plantuml_storage_size }}
+  storageClassName: {{ plantuml_storage_class }}

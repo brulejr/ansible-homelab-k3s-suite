@@ -1,6 +1,7 @@
-
 ---
 plantuml_enabled: true
+
+# Preserve existing contract
 plantuml_namespace: apps
 plantuml_app_name: plantuml
 plantuml_hostname: plantuml.lab.example.com
@@ -11,3 +12,13 @@ plantuml_ingress_class_name: traefik
 plantuml_storage_enabled: false
 plantuml_storage_class: ""
 
+# Expanded contract
+plantuml_replicas: 1
+plantuml_container_port: 8080
+
+plantuml_tls_enabled: true
+plantuml_tls_cert_resolver: le
+
+plantuml_ingress_middlewares: []
+
+plantuml_storage_size: 1Gi
