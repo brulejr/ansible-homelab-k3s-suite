@@ -1,0 +1,36 @@
+---
+- name: Assert Gitea domain is defined
+  ansible.builtin.assert:
+    that:
+      - gitea_host_domain | length > 0
+      - gitea_host_root_url | length > 0
+    fail_msg: "gitea_host_domain and gitea_host_root_url must be defined"
+
+- name: Assert Gitea ports are valid
+  ansible.builtin.assert:
+    that:
+      - gitea_host_http_port | int > 0
+      - gitea_host_http_port | int < 65536
+      - gitea_host_ssh_port | int > 0
+      - gitea_host_ssh_port | int < 65536
+    fail_msg: "gitea_host_http_port and gitea_host_ssh_port must be valid TCP ports"
+
+- name: Assert Gitea admin bootstrap values are defined
+  ansible.builtin.assert:
+    that:
+      - gitea_host_admin_username | length > 0
+      - gitea_host_admin_password | length > 0
+      - gitea_host_secret_key | length > 0
+    fail_msg: "gitea_host_admin_username, gitea_host_admin_password, and gitea_host_secret_key must be defined"
+
+- name: Assert supported database configuration
+  ansible.builtin.assert:
+    that:
+      - gitea_host_db_type in ['sqlite3', 'postgres', 'mysql']
+    fail_msg: "gitea_host_db_type must be one of: sqlite3, postgres, mysql"
+
+- name: Assert external DB host is set when not using sqlite
+  ansible.builtin.assert:
+    that:
+      - gitea_host_db_type == 'sqlite3' or gitea_host_db_host | length > 0
+    fail_msg: "gitea_host_db_host must be defined when gitea_host_db_type is not sqlite3"

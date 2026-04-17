@@ -1,0 +1,21 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert Gitea service exists
+  ansible.builtin.assert:
+    that:
+      - "'{{ gitea_host_service_name }}.service' in ansible_facts.services"
+    fail_msg: "Gitea systemd service was not found"
+
+- name: Assert Gitea service is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services[gitea_host_service_name ~ '.service'].state == 'running'
+    fail_msg: "Gitea service is not running"
+
+- name: Wait for Gitea HTTP port
+  ansible.builtin.wait_for:
+    host: "127.0.0.1"
+    port: "{{ gitea_host_http_port }}"
+    timeout: 30

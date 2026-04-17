@@ -1,0 +1,36 @@
+APP_NAME = Gitea
+RUN_USER = {{ gitea_host_run_user }}
+RUN_MODE = prod
+
+[server]
+APP_DATA_PATH = {{ gitea_host_data_dir }}
+DOMAIN = {{ gitea_host_domain }}
+SSH_DOMAIN = {{ gitea_host_domain }}
+HTTP_PORT = {{ gitea_host_http_port }}
+ROOT_URL = {{ gitea_host_root_url }}
+DISABLE_SSH = false
+SSH_PORT = {{ gitea_host_ssh_port }}
+START_SSH_SERVER = true
+OFFLINE_MODE = false
+
+[database]
+DB_TYPE = {{ gitea_host_db_type }}
+{% if gitea_host_db_type == 'sqlite3' %}
+PATH = {{ gitea_host_data_dir }}/gitea.db
+{% else %}
+HOST = {{ gitea_host_db_host }}
+NAME = {{ gitea_host_db_name }}
+USER = {{ gitea_host_db_user }}
+PASSWD = {{ gitea_host_db_password }}
+{% endif %}
+
+[security]
+INSTALL_LOCK = true
+SECRET_KEY = {{ gitea_host_secret_key }}
+
+[service]
+DISABLE_REGISTRATION = true
+
+[log]
+MODE = file
+ROOT_PATH = {{ gitea_host_log_dir }}

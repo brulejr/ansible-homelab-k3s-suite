@@ -1,0 +1,18 @@
+[Unit]
+Description=Gitea
+After=network.target
+
+[Service]
+Type=simple
+User={{ gitea_host_run_user }}
+Group={{ gitea_host_run_group }}
+WorkingDirectory={{ gitea_host_data_dir }}
+ExecStart={{ gitea_host_binary_path }} web --config {{ gitea_host_config_dir }}/app.ini
+Restart=always
+RestartSec=2s
+Environment=USER={{ gitea_host_run_user }}
+Environment=HOME={{ gitea_host_data_dir }}
+Environment=GITEA_WORK_DIR={{ gitea_host_data_dir }}
+
+[Install]
+WantedBy=multi-user.target
