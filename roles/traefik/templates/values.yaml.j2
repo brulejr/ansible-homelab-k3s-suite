@@ -1,0 +1,39 @@
+deployment:
+  enabled: true
+
+service:
+  type: {{ traefik_service_type }}
+
+ingressClass:
+  enabled: true
+  isDefaultClass: false
+  name: {{ traefik_ingress_class_name }}
+
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+    expose:
+      default: true
+  websecure:
+    port: 8443
+    exposedPort: 443
+    expose:
+      default: true
+
+additionalArguments:
+{% if traefik_acme_enabled %}
+  - "--certificatesresolvers.le.acme.email={{ traefik_acme_email }}"
+  - "--certificatesresolvers.le.acme.storage={{ traefik_acme_storage_path }}"
+  - "--certificatesresolvers.le.acme.httpchallenge=true"
+  - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+  - "--certificatesresolvers.le.acme.caserver={{ traefik_acme_ca_server }}"
+{% endif %}
+
+persistence:
+  enabled: true
+  path: /data
+  size: 128Mi
+
+dashboard:
+  enabled: true

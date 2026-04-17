@@ -1,0 +1,18 @@
+---
+- name: Assert Traefik namespace is defined
+  ansible.builtin.assert:
+    that:
+      - traefik_namespace | length > 0
+    fail_msg: "traefik_namespace must be defined"
+
+- name: Assert Traefik ACME email is defined when ACME enabled
+  ansible.builtin.assert:
+    that:
+      - not traefik_acme_enabled or (traefik_acme_email | length > 0)
+    fail_msg: "traefik_acme_email must be defined when traefik_acme_enabled is true"
+
+- name: Assert dashboard hostname is defined when dashboard enabled
+  ansible.builtin.assert:
+    that:
+      - not traefik_dashboard_enabled or (traefik_dashboard_hostname | length > 0)
+    fail_msg: "traefik_dashboard_hostname must be defined when traefik_dashboard_enabled is true"

@@ -1,0 +1,51 @@
+---
+- name: Install Traefik prerequisite packages
+  ansible.builtin.package:
+    name: "{{ traefik_prerequisite_packages }}"
+    state: present
+
+- name: Ensure Traefik namespace exists
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl create namespace {{ traefik_namespace }}
+  register: traefik_namespace_create
+  changed_when: "'created' in traefik_namespace_create.stdout"
+  failed_when:
+    - traefik_namespace_create.rc != 0
+    - "'AlreadyExists' not in traefik_namespace_create.stderr"
+
+- name: Render Traefik Helm values
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: "{{ traefik_values_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install or upgrade Traefik via Helm
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    helm repo add {{ traefik_chart_repo_name }} {{ traefik_chart_repo_url }}
+    helm repo update
+    helm upgrade --install {{ traefik_release_name }} {{ traefik_chart_repo_name }}/{{ traefik_chart_name }} \
+      --namespace {{ traefik_namespace }} \
+      --create-namespace \
+      {% if traefik_chart_version | length > 0 %}--version {{ traefik_chart_version }} \{% endif %}
+      -f {{ traefik_values_file }}
+  args:
+    executable: /bin/bash
+
+- name: Render Traefik dashboard IngressRoute
+  ansible.builtin.template:
+    src: dashboard-ingressroute.yaml.j2
+    dest: /tmp/traefik-dashboard-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: traefik_dashboard_enabled | bool
+
+- name: Apply Traefik dashboard IngressRoute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/traefik-dashboard-ingressroute.yaml
+  when: traefik_dashboard_enabled | bool
