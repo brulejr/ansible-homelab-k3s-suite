@@ -2,6 +2,7 @@
 - name: Wait for MQTT deployment rollout
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ mqtt_namespace }} rollout status deploy/{{ mqtt_app_name }} --timeout=120s
+  register: mqtt_rollout
   changed_when: false
 
 - name: Get MQTT pods
@@ -13,4 +14,5 @@
 - name: Get MQTT service
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ mqtt_namespace }} get svc {{ mqtt_app_name }}
+  register: mqtt_service
   changed_when: false

@@ -2,10 +2,17 @@
 - name: Wait for Traefik deployment rollout
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ traefik_namespace }} rollout status deploy/{{ traefik_release_name }} --timeout=120s
+  register: traefik_rollout
   changed_when: false
 
 - name: Get Traefik pods
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ traefik_namespace }} get pods -o wide
   register: traefik_pods
+  changed_when: false
+
+- name: Get Traefik service
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ traefik_namespace }} get svc {{ traefik_release_name }}
+  register: traefik_service
   changed_when: false

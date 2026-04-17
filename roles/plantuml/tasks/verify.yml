@@ -2,6 +2,7 @@
 - name: Wait for PlantUML deployment rollout
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ plantuml_namespace }} rollout status deploy/{{ plantuml_app_name }} --timeout=120s
+  register: plantuml_rollout
   changed_when: false
 
 - name: Get PlantUML pods
@@ -13,4 +14,5 @@
 - name: Get PlantUML service
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ plantuml_namespace }} get svc {{ plantuml_app_name }}
+  register: plantuml_service
   changed_when: false
