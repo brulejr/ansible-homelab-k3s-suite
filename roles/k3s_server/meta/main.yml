@@ -4,9 +4,19 @@ galaxy_info:
   description: Host-level K3S server bootstrap role
   license: MIT
   min_ansible_version: "2.15"
+
   platforms:
     - name: EL
-      versions: ["9"]
+      versions:
+        - "9"
+    - name: Fedora
+      versions:
+        - "all"
     - name: Debian
-      versions: ["12"]
+      versions:
+        - "12"
+    - name: Ubuntu
+      versions:
+        - "24.04"
+
 dependencies: []

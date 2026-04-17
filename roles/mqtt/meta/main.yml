@@ -1,12 +1,22 @@
 ---
 galaxy_info:
   author: Jon Brule
-  description: Self-contained sample MQTT application role for K3S
+  description: Sample MQTT application role for K3S
   license: MIT
   min_ansible_version: "2.15"
+
   platforms:
     - name: EL
-      versions: ["9"]
+      versions:
+        - "9"
+    - name: Fedora
+      versions:
+        - "all"
     - name: Debian
-      versions: ["12"]
+      versions:
+        - "12"
+    - name: Ubuntu
+      versions:
+        - "24.04"
+
 dependencies: []

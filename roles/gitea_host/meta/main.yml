@@ -1,12 +1,22 @@
 ---
 galaxy_info:
   author: Jon Brule
-  description: Host-level Gitea role installed outside the K3S cluster
+  description: Host-level Gitea installation role for homelab bootstrap
   license: MIT
   min_ansible_version: "2.15"
+
   platforms:
     - name: EL
-      versions: ["9"]
+      versions:
+        - "9"
+    - name: Fedora
+      versions:
+        - "all"
     - name: Debian
-      versions: ["12"]
+      versions:
+        - "12"
+    - name: Ubuntu
+      versions:
+        - "24.04"
+
 dependencies: []
