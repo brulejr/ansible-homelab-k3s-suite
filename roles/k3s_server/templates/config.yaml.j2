@@ -1,0 +1,64 @@
+write-kubeconfig-mode: "{{ k3s_server_write_kubeconfig_mode }}"
+{% if k3s_server_cluster_init %}
+cluster-init: true
+{% endif %}
+{% if not k3s_server_cluster_init and k3s_server_token | length > 0 %}
+token: "{{ k3s_server_token }}"
+{% endif %}
+{% if k3s_server_node_ip | length > 0 %}
+node-ip: "{{ k3s_server_node_ip }}"
+{% endif %}
+{% if k3s_server_advertise_ip | length > 0 %}
+advertise-address: "{{ k3s_server_advertise_ip }}"
+{% endif %}
+{% if k3s_server_bind_address | length > 0 %}
+bind-address: "{{ k3s_server_bind_address }}"
+{% endif %}
+{% if k3s_server_flannel_iface | length > 0 %}
+flannel-iface: "{{ k3s_server_flannel_iface }}"
+{% endif %}
+{% if k3s_server_disable_traefik %}
+disable:
+  - traefik
+{% for item in k3s_server_disable_components %}
+  - {{ item }}
+{% endfor %}
+{% elif k3s_server_disable_components | length > 0 %}
+disable:
+{% for item in k3s_server_disable_components %}
+  - {{ item }}
+{% endfor %}
+{% endif %}
+{% if k3s_server_tls_sans | length > 0 %}
+tls-san:
+{% for san in k3s_server_tls_sans %}
+  - {{ san }}
+{% endfor %}
+{% endif %}
+{% if k3s_server_kube_apiserver_args | length > 0 %}
+kube-apiserver-arg:
+{% for arg in k3s_server_kube_apiserver_args %}
+  - {{ arg }}
+{% endfor %}
+{% endif %}
+{% if k3s_server_kube_controller_manager_args | length > 0 %}
+kube-controller-manager-arg:
+{% for arg in k3s_server_kube_controller_manager_args %}
+  - {{ arg }}
+{% endfor %}
+{% endif %}
+{% if k3s_server_kube_scheduler_args | length > 0 %}
+kube-scheduler-arg:
+{% for arg in k3s_server_kube_scheduler_args %}
+  - {{ arg }}
+{% endfor %}
+{% endif %}
+{% if k3s_server_etcd_args | length > 0 %}
+etcd-arg:
+{% for arg in k3s_server_etcd_args %}
+  - {{ arg }}
+{% endfor %}
+{% endif %}
+{% for arg in k3s_server_extra_args %}
+# extra-arg: {{ arg }}
+{% endfor %}

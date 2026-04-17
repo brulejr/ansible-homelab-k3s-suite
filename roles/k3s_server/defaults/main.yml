@@ -1,6 +1,7 @@
-
 ---
 k3s_server_enabled: true
+
+# Preserve existing contract
 k3s_server_version: ""
 k3s_server_cluster_init: true
 k3s_server_token: ""
@@ -9,3 +10,27 @@ k3s_server_disable_traefik: true
 k3s_server_tls_sans: []
 k3s_server_extra_args: []
 
+# Expanded host/runtime contract
+k3s_server_channel: stable
+k3s_server_install_script_url: https://get.k3s.io
+k3s_server_service_name: k3s
+k3s_server_config_dir: /etc/rancher/k3s
+k3s_server_config_file: "{{ k3s_server_config_dir }}/config.yaml"
+k3s_server_service_env_file: /etc/systemd/system/k3s.service.env
+
+k3s_server_node_ip: ""
+k3s_server_advertise_ip: ""
+k3s_server_bind_address: ""
+k3s_server_flannel_iface: ""
+
+k3s_server_disable_components: []
+k3s_server_kube_apiserver_args: []
+k3s_server_kube_controller_manager_args: []
+k3s_server_kube_scheduler_args: []
+k3s_server_etcd_args: []
+
+k3s_server_prerequisite_packages:
+  - curl
+  - ca-certificates
+
+k3s_server_selinux_disable: false

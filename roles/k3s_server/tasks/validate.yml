@@ -1,0 +1,34 @@
+---
+- name: Assert k3s_server_cluster_init is boolean
+  ansible.builtin.assert:
+    that:
+      - k3s_server_cluster_init is boolean
+    fail_msg: "k3s_server_cluster_init must be true or false"
+
+- name: Assert write kubeconfig mode is set
+  ansible.builtin.assert:
+    that:
+      - k3s_server_write_kubeconfig_mode | length > 0
+    fail_msg: "k3s_server_write_kubeconfig_mode must be defined"
+
+- name: Assert K3S token is defined when not cluster-init
+  ansible.builtin.assert:
+    that:
+      - k3s_server_cluster_init or (k3s_server_token | length > 0)
+    fail_msg: "k3s_server_token must be defined when k3s_server_cluster_init is false"
+
+- name: Assert TLS SAN entries are strings
+  ansible.builtin.assert:
+    that:
+      - item is string
+      - item | length > 0
+    fail_msg: "k3s_server_tls_sans entries must be non-empty strings"
+  loop: "{{ k3s_server_tls_sans }}"
+
+- name: Assert extra args entries are strings
+  ansible.builtin.assert:
+    that:
+      - item is string
+      - item | length > 0
+    fail_msg: "k3s_server_extra_args entries must be non-empty strings"
+  loop: "{{ k3s_server_extra_args }}"

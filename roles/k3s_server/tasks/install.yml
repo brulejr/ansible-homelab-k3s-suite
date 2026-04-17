@@ -1,0 +1,54 @@
+---
+- name: Install K3S prerequisite packages
+  ansible.builtin.package:
+    name: "{{ k3s_server_prerequisite_packages }}"
+    state: present
+
+- name: Ensure K3S config directory exists
+  ansible.builtin.file:
+    path: "{{ k3s_server_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render K3S config.yaml
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ k3s_server_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart k3s
+
+- name: Render K3S service environment file
+  ansible.builtin.template:
+    src: k3s.service.env.j2
+    dest: "{{ k3s_server_service_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart k3s
+
+- name: Install K3S server
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    curl -sfL {{ k3s_server_install_script_url }} | sh -
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_CHANNEL: "{{ k3s_server_channel }}"
+    INSTALL_K3S_VERSION: "{{ k3s_server_version if k3s_server_version | length > 0 else omit }}"
+  register: k3s_server_install_result
+
+- name: Ensure K3S service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ k3s_server_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

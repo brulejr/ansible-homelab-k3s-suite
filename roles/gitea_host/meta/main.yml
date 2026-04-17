@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Jon Brule
-  description: Gitea role for running on Host OS
+  description: Host-level Gitea role installed outside the K3S cluster
   license: MIT
   min_ansible_version: "2.15"
   platforms:
