@@ -21,6 +21,10 @@ ports:
     expose:
       default: true
 
+api:
+  dashboard: true
+  insecure: false
+
 additionalArguments:
 {% if traefik_acme_enabled %}
   - "--certificatesresolvers.le.acme.email={{ traefik_acme_email }}"
@@ -34,6 +38,3 @@ persistence:
   enabled: true
   path: /data
   size: 128Mi
-
-dashboard:
-  enabled: true
