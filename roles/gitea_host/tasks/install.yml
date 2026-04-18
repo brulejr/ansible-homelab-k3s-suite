@@ -21,11 +21,11 @@
 
 - name: Ensure Gitea directories exist
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ gitea_dir.path }}"
     state: directory
-    owner: "{{ item.owner | default(gitea_host_user) }}"
-    group: "{{ item.group | default(gitea_host_group) }}"
-    mode: "{{ item.mode }}"
+    owner: "{{ gitea_dir.owner | default(gitea_host_user) }}"
+    group: "{{ gitea_dir.group | default(gitea_host_group) }}"
+    mode: "{{ gitea_dir.mode }}"
   loop:
     - {
         path: "{{ gitea_host_install_dir }}",
@@ -37,8 +37,15 @@
     - { path: "{{ gitea_host_data_dir }}/custom", mode: "0755" }
     - { path: "{{ gitea_host_data_dir }}/repositories", mode: "0755" }
     - { path: "{{ gitea_host_data_dir }}/tmp", mode: "0755" }
-    - { path: "{{ gitea_host_config_dir }}", mode: "0750" }
+    - {
+        path: "{{ gitea_host_config_dir }}",
+        mode: "0750",
+        owner: "root",
+        group: "{{ gitea_host_group }}",
+      }
     - { path: "{{ gitea_host_log_dir }}", mode: "0755" }
+  loop_control:
+    loop_var: gitea_dir
 
 - name: Download Gitea binary
   ansible.builtin.get_url:
@@ -52,7 +59,7 @@
   ansible.builtin.template:
     src: app.ini.j2
     dest: "{{ gitea_host_config_dir }}/app.ini"
-    owner: root
+    owner: "{{ gitea_host_user }}"
     group: "{{ gitea_host_group }}"
     mode: "0640"
   notify: Restart gitea
