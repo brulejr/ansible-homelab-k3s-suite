@@ -20,15 +20,19 @@
 - name: Assert TLS SAN entries are strings
   ansible.builtin.assert:
     that:
-      - item is string
-      - item | length > 0
+      - k3s_tls_san is string
+      - k3s_tls_san | length > 0
     fail_msg: "k3s_server_tls_sans entries must be non-empty strings"
   loop: "{{ k3s_server_tls_sans }}"
+  loop_control:
+    loop_var: k3s_tls_san
 
 - name: Assert extra args entries are strings
   ansible.builtin.assert:
     that:
-      - item is string
-      - item | length > 0
+      - k3s_extra_arg is string
+      - k3s_extra_arg | length > 0
     fail_msg: "k3s_server_extra_args entries must be non-empty strings"
   loop: "{{ k3s_server_extra_args }}"
+  loop_control:
+    loop_var: k3s_extra_arg

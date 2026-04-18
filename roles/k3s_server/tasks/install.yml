@@ -32,7 +32,7 @@
     - Reload systemd
     - Restart k3s
 
-- name: Install K3S server
+- name: Install K3S server using channel
   ansible.builtin.shell: |
     set -o errexit
     set -o nounset
@@ -43,8 +43,21 @@
     creates: /usr/local/bin/k3s
   environment:
     INSTALL_K3S_CHANNEL: "{{ k3s_server_channel }}"
-    INSTALL_K3S_VERSION: "{{ k3s_server_version if k3s_server_version | length > 0 else omit }}"
-  register: k3s_server_install_result
+  when: k3s_server_version | length == 0
+
+- name: Install K3S server using explicit version
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    curl -sfL {{ k3s_server_install_script_url }} | sh -
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_CHANNEL: "{{ k3s_server_channel }}"
+    INSTALL_K3S_VERSION: "{{ k3s_server_version }}"
+  when: k3s_server_version | length > 0
 
 - name: Ensure K3S service is enabled and started
   ansible.builtin.systemd:
