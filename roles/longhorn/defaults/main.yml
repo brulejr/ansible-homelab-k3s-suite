@@ -29,8 +29,14 @@ longhorn_default_settings: {}
 # Helm install
 longhorn_helm_binary_path: /usr/local/bin/helm
 
-# Host prerequisites
-longhorn_prerequisite_packages:
-  - open-iscsi
-  - nfs-utils
+# Host prerequisites by platform
+longhorn_prerequisite_packages_common:
   - tar
+
+longhorn_prerequisite_packages_debian:
+  - open-iscsi
+  - nfs-common
+
+longhorn_prerequisite_packages_redhat:
+  - iscsi-initiator-utils
+  - nfs-utils

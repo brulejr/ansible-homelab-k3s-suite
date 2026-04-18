@@ -1,22 +1,37 @@
 ---
+- name: Build Longhorn prerequisite package list
+  ansible.builtin.set_fact:
+    longhorn_prerequisite_packages: >-
+      {{
+        longhorn_prerequisite_packages_common
+        + (
+            longhorn_prerequisite_packages_debian
+            if ansible_os_family == 'Debian'
+            else longhorn_prerequisite_packages_redhat
+          )
+      }}
+
 - name: Install Longhorn prerequisite packages
   ansible.builtin.package:
     name: "{{ longhorn_prerequisite_packages }}"
     state: present
 
-- name: Enable and start iscsid
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Enable and start iscsid when present
   ansible.builtin.systemd:
     name: iscsid
     enabled: true
     state: started
-  ignore_errors: true
+  when: "'iscsid.service' in ansible_facts.services"
 
-- name: Enable and start open-iscsi
+- name: Enable and start open-iscsi when present
   ansible.builtin.systemd:
     name: open-iscsi
     enabled: true
     state: started
-  ignore_errors: true
+  when: "'open-iscsi.service' in ansible_facts.services"
 
 - name: Ensure Longhorn namespace exists
   ansible.builtin.command:
@@ -39,8 +54,10 @@
   ansible.builtin.command:
     cmd: "{{ longhorn_helm_binary_path }} --kubeconfig {{ longhorn_kubeconfig_path }} repo add {{ longhorn_chart_repo_name }} {{ longhorn_chart_repo_url }}"
   register: longhorn_repo_add
-  changed_when: "'has been added' in longhorn_repo_add.stdout or 'already exists' not in longhorn_repo_add.stderr"
-  failed_when: false
+  changed_when: "'has been added' in longhorn_repo_add.stdout"
+  failed_when:
+    - longhorn_repo_add.rc != 0
+    - "'already exists' not in (longhorn_repo_add.stderr | default(''))"
 
 - name: Update Helm repos
   ansible.builtin.command:
