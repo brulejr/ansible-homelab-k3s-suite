@@ -27,6 +27,15 @@ traefik_acme_storage_path: /data/acme.json
 # Runtime
 traefik_values_file: /tmp/traefik-values.yaml
 
+# Helm install
+traefik_helm_version: v3.18.0
+traefik_helm_platform: linux-amd64
+traefik_helm_archive: "helm-{{ traefik_helm_version }}-{{ traefik_helm_platform }}.tar.gz"
+traefik_helm_download_url: "https://get.helm.sh/{{ traefik_helm_archive }}"
+traefik_helm_download_path: "/tmp/{{ traefik_helm_archive }}"
+traefik_helm_extract_path: /tmp
+traefik_helm_binary_path: /usr/local/bin/helm
+
 # Host prerequisites
 traefik_prerequisite_packages:
-  - helm
+  - tar

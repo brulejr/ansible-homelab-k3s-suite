@@ -5,7 +5,7 @@
 - name: Assert K3S service exists
   ansible.builtin.assert:
     that:
-      - "'{{ k3s_server_service_name }}.service' in ansible_facts.services"
+      - k3s_server_service_name ~ '.service' in ansible_facts.services
     fail_msg: "K3S systemd service was not found"
 
 - name: Assert K3S service is running

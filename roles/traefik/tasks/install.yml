@@ -4,6 +4,28 @@
     name: "{{ traefik_prerequisite_packages }}"
     state: present
 
+- name: Download Helm archive
+  ansible.builtin.get_url:
+    url: "{{ traefik_helm_download_url }}"
+    dest: "{{ traefik_helm_download_path }}"
+    mode: "0644"
+
+- name: Extract Helm archive
+  ansible.builtin.unarchive:
+    src: "{{ traefik_helm_download_path }}"
+    dest: "{{ traefik_helm_extract_path }}"
+    remote_src: true
+    creates: "{{ traefik_helm_extract_path }}/{{ traefik_helm_platform }}/helm"
+
+- name: Install Helm binary
+  ansible.builtin.copy:
+    src: "{{ traefik_helm_extract_path }}/{{ traefik_helm_platform }}/helm"
+    dest: "{{ traefik_helm_binary_path }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Ensure Traefik namespace exists
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl create namespace {{ traefik_namespace }}
@@ -26,9 +48,9 @@
     set -o errexit
     set -o nounset
     set -o pipefail
-    helm repo add {{ traefik_chart_repo_name }} {{ traefik_chart_repo_url }}
-    helm repo update
-    helm upgrade --install {{ traefik_release_name }} {{ traefik_chart_repo_name }}/{{ traefik_chart_name }} \
+    {{ traefik_helm_binary_path }} repo add {{ traefik_chart_repo_name }} {{ traefik_chart_repo_url }}
+    {{ traefik_helm_binary_path }} repo update
+    {{ traefik_helm_binary_path }} upgrade --install {{ traefik_release_name }} {{ traefik_chart_repo_name }}/{{ traefik_chart_name }} \
       --namespace {{ traefik_namespace }} \
       --create-namespace \
       {% if traefik_chart_version | length > 0 %}--version {{ traefik_chart_version }} \{% endif %}
