@@ -1,0 +1,76 @@
+---
+- name: Install Longhorn prerequisite packages
+  ansible.builtin.package:
+    name: "{{ longhorn_prerequisite_packages }}"
+    state: present
+
+- name: Enable and start iscsid
+  ansible.builtin.systemd:
+    name: iscsid
+    enabled: true
+    state: started
+  ignore_errors: true
+
+- name: Enable and start open-iscsi
+  ansible.builtin.systemd:
+    name: open-iscsi
+    enabled: true
+    state: started
+  ignore_errors: true
+
+- name: Ensure Longhorn namespace exists
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl create namespace {{ longhorn_namespace }}
+  register: longhorn_namespace_create
+  changed_when: "'created' in longhorn_namespace_create.stdout"
+  failed_when:
+    - longhorn_namespace_create.rc != 0
+    - "'AlreadyExists' not in longhorn_namespace_create.stderr"
+
+- name: Render Longhorn Helm values
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: "{{ longhorn_values_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add Longhorn Helm repo
+  ansible.builtin.command:
+    cmd: "{{ longhorn_helm_binary_path }} --kubeconfig {{ longhorn_kubeconfig_path }} repo add {{ longhorn_chart_repo_name }} {{ longhorn_chart_repo_url }}"
+  register: longhorn_repo_add
+  changed_when: "'has been added' in longhorn_repo_add.stdout or 'already exists' not in longhorn_repo_add.stderr"
+  failed_when: false
+
+- name: Update Helm repos
+  ansible.builtin.command:
+    cmd: "{{ longhorn_helm_binary_path }} --kubeconfig {{ longhorn_kubeconfig_path }} repo update"
+  changed_when: false
+
+- name: Install or upgrade Longhorn via Helm
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    {{ longhorn_helm_binary_path }} --kubeconfig {{ longhorn_kubeconfig_path }} upgrade --install {{ longhorn_release_name }} {{ longhorn_chart_repo_name }}/{{ longhorn_chart_name }} \
+      --namespace {{ longhorn_namespace }} \
+      --create-namespace \
+      {% if longhorn_chart_version | length > 0 %}--version {{ longhorn_chart_version }} \{% endif %}
+      -f {{ longhorn_values_file }}
+  args:
+    executable: /bin/bash
+
+- name: Render Longhorn UI IngressRoute
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/longhorn-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: longhorn_ui_enabled | bool
+
+- name: Apply Longhorn UI IngressRoute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/longhorn-ingressroute.yaml
+  when: longhorn_ui_enabled | bool
+  changed_when: false

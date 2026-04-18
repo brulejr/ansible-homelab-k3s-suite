@@ -1,0 +1,12 @@
+---
+- name: Validate longhorn configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: longhorn_enabled | bool
+
+- name: Install and configure longhorn
+  ansible.builtin.include_tasks: install.yml
+  when: longhorn_enabled | bool
+
+- name: Verify longhorn
+  ansible.builtin.include_tasks: verify.yml
+  when: longhorn_enabled | bool

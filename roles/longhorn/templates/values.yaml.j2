@@ -1,0 +1,22 @@
+persistence:
+  defaultClass: {{ longhorn_default_storage_class | lower }}
+  defaultClassReplicaCount: 1
+  defaultDataLocality: disabled
+
+defaultSettings:
+{% if longhorn_default_settings | length > 0 %}
+{% for key, value in longhorn_default_settings.items() %}
+  {{ key }}: {{ value }}
+{% endfor %}
+{% else %}
+  defaultDataPath: /var/lib/longhorn
+{% endif %}
+
+ingress:
+  enabled: false
+
+csi:
+  kubeletRootDir: /var/lib/kubelet
+
+preUpgradeChecker:
+  jobEnabled: true

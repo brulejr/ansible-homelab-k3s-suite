@@ -1,0 +1,18 @@
+---
+- name: Assert Longhorn namespace is defined
+  ansible.builtin.assert:
+    that:
+      - longhorn_namespace | length > 0
+    fail_msg: "longhorn_namespace must be defined"
+
+- name: Assert Longhorn UI hostname is defined when UI enabled
+  ansible.builtin.assert:
+    that:
+      - not longhorn_ui_enabled or (longhorn_ui_hostname | length > 0)
+    fail_msg: "longhorn_ui_hostname must be defined when longhorn_ui_enabled is true"
+
+- name: Assert Longhorn storage class name is defined
+  ansible.builtin.assert:
+    that:
+      - longhorn_storage_class_name | length > 0
+    fail_msg: "longhorn_storage_class_name must be defined"

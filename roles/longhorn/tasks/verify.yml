@@ -1,0 +1,30 @@
+---
+- name: Wait for Longhorn manager daemonset rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ longhorn_namespace }} rollout status daemonset/longhorn-manager --timeout=300s
+  register: longhorn_manager_rollout
+  changed_when: false
+
+- name: Wait for Longhorn driver deployer rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ longhorn_namespace }} rollout status deploy/longhorn-driver-deployer --timeout=300s
+  register: longhorn_driver_rollout
+  changed_when: false
+
+- name: Wait for Longhorn UI rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ longhorn_namespace }} rollout status deploy/longhorn-ui --timeout=300s
+  register: longhorn_ui_rollout
+  changed_when: false
+
+- name: Get Longhorn pods
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ longhorn_namespace }} get pods -o wide
+  register: longhorn_pods
+  changed_when: false
+
+- name: Get storage classes
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl get storageclass
+  register: longhorn_storageclasses
+  changed_when: false
