@@ -26,6 +26,7 @@ traefik_acme_storage_path: /data/acme.json
 
 # Runtime
 traefik_values_file: /tmp/traefik-values.yaml
+traefik_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
 
 # Helm install
 traefik_helm_version: v3.18.0

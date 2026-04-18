@@ -48,9 +48,9 @@
     set -o errexit
     set -o nounset
     set -o pipefail
-    {{ traefik_helm_binary_path }} repo add {{ traefik_chart_repo_name }} {{ traefik_chart_repo_url }}
-    {{ traefik_helm_binary_path }} repo update
-    {{ traefik_helm_binary_path }} upgrade --install {{ traefik_release_name }} {{ traefik_chart_repo_name }}/{{ traefik_chart_name }} \
+    {{ traefik_helm_binary_path }} --kubeconfig {{ traefik_kubeconfig_path }} repo add {{ traefik_chart_repo_name }} {{ traefik_chart_repo_url }}
+    {{ traefik_helm_binary_path }} --kubeconfig {{ traefik_kubeconfig_path }} repo update
+    {{ traefik_helm_binary_path }} --kubeconfig {{ traefik_kubeconfig_path }} upgrade --install {{ traefik_release_name }} {{ traefik_chart_repo_name }}/{{ traefik_chart_name }} \
       --namespace {{ traefik_namespace }} \
       --create-namespace \
       {% if traefik_chart_version | length > 0 %}--version {{ traefik_chart_version }} \{% endif %}
