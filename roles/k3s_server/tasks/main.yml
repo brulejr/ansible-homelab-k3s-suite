@@ -1,13 +1,12 @@
 ---
-- name: Skip k3s_server when disabled
-  ansible.builtin.meta: end_role
-  when: not k3s_server_enabled | bool
-
 - name: Validate k3s_server configuration
   ansible.builtin.include_tasks: validate.yml
+  when: k3s_server_enabled | bool
 
 - name: Install and configure k3s_server
   ansible.builtin.include_tasks: install.yml
+  when: k3s_server_enabled | bool
 
 - name: Verify k3s_server
   ansible.builtin.include_tasks: verify.yml
+  when: k3s_server_enabled | bool

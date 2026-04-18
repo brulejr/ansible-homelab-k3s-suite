@@ -1,13 +1,12 @@
 ---
-- name: Skip plantuml when disabled
-  ansible.builtin.meta: end_role
-  when: not plantuml_enabled | bool
-
 - name: Validate plantuml configuration
   ansible.builtin.include_tasks: validate.yml
+  when: plantuml_enabled | bool
 
 - name: Install and configure plantuml
   ansible.builtin.include_tasks: install.yml
+  when: plantuml_enabled | bool
 
 - name: Verify plantuml
   ansible.builtin.include_tasks: verify.yml
+  when: plantuml_enabled | bool

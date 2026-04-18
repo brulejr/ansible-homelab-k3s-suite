@@ -1,13 +1,12 @@
 ---
-- name: Skip gitea_host when disabled
-  ansible.builtin.meta: end_role
-  when: not gitea_host_enabled | bool
-
 - name: Validate gitea_host configuration
   ansible.builtin.include_tasks: validate.yml
+  when: gitea_host_enabled | bool
 
 - name: Install and configure gitea_host
   ansible.builtin.include_tasks: install.yml
+  when: gitea_host_enabled | bool
 
 - name: Verify gitea_host
   ansible.builtin.include_tasks: verify.yml
+  when: gitea_host_enabled | bool
