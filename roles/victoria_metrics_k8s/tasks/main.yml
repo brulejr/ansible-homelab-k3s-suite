@@ -1,0 +1,12 @@
+---
+- name: Validate victoria_metrics_k8s configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: victoria_metrics_k8s_enabled | bool
+
+- name: Install and configure victoria_metrics_k8s
+  ansible.builtin.include_tasks: install.yml
+  when: victoria_metrics_k8s_enabled | bool
+
+- name: Verify victoria_metrics_k8s
+  ansible.builtin.include_tasks: verify.yml
+  when: victoria_metrics_k8s_enabled | bool

@@ -1,0 +1,33 @@
+---
+victoria_metrics_k8s_enabled: true
+
+# Release
+victoria_metrics_k8s_namespace: monitoring
+victoria_metrics_k8s_release_name: victoria-metrics-k8s-stack
+victoria_metrics_k8s_chart_name: victoria-metrics-k8s-stack
+victoria_metrics_k8s_chart_repo_name: vm
+victoria_metrics_k8s_chart_repo_url: https://victoriametrics.github.io/helm-charts/
+victoria_metrics_k8s_chart_version: ""
+
+# Runtime
+victoria_metrics_k8s_values_file: /tmp/victoria-metrics-k8s-values.yaml
+victoria_metrics_k8s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+victoria_metrics_k8s_helm_binary_path: /usr/local/bin/helm
+
+# Grafana exposure
+victoria_metrics_k8s_grafana_enabled: true
+victoria_metrics_k8s_grafana_hostname: ""
+victoria_metrics_k8s_ingress_class_name: traefik
+victoria_metrics_k8s_ui_middlewares: []
+victoria_metrics_k8s_tls_enabled: true
+victoria_metrics_k8s_tls_cert_resolver: le
+
+# Persistence
+victoria_metrics_k8s_persistence_enabled: true
+victoria_metrics_k8s_default_storage_class: longhorn
+victoria_metrics_k8s_vmstorage_size: 20Gi
+victoria_metrics_k8s_grafana_size: 10Gi
+
+# Host prerequisites
+victoria_metrics_k8s_prerequisite_packages:
+  - tar

@@ -1,0 +1,64 @@
+---
+- name: Install VictoriaMetrics prerequisite packages
+  ansible.builtin.package:
+    name: "{{ victoria_metrics_k8s_prerequisite_packages }}"
+    state: present
+
+- name: Ensure VictoriaMetrics namespace exists
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl create namespace {{ victoria_metrics_k8s_namespace }}
+  register: victoria_metrics_k8s_namespace_create
+  changed_when: "'created' in victoria_metrics_k8s_namespace_create.stdout"
+  failed_when:
+    - victoria_metrics_k8s_namespace_create.rc != 0
+    - "'AlreadyExists' not in victoria_metrics_k8s_namespace_create.stderr"
+
+- name: Render VictoriaMetrics Helm values
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: "{{ victoria_metrics_k8s_values_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add VictoriaMetrics Helm repo
+  ansible.builtin.command:
+    cmd: "{{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} repo add {{ victoria_metrics_k8s_chart_repo_name }} {{ victoria_metrics_k8s_chart_repo_url }}"
+  register: victoria_metrics_k8s_repo_add
+  changed_when: "'has been added' in victoria_metrics_k8s_repo_add.stdout"
+  failed_when:
+    - victoria_metrics_k8s_repo_add.rc != 0
+    - "'already exists' not in (victoria_metrics_k8s_repo_add.stderr | default(''))"
+
+- name: Update Helm repos
+  ansible.builtin.command:
+    cmd: "{{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} repo update"
+  changed_when: false
+
+- name: Install or upgrade VictoriaMetrics K8s Stack via Helm
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    {{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} upgrade --install {{ victoria_metrics_k8s_release_name }} {{ victoria_metrics_k8s_chart_repo_name }}/{{ victoria_metrics_k8s_chart_name }} \
+      --namespace {{ victoria_metrics_k8s_namespace }} \
+      --create-namespace \
+      {% if victoria_metrics_k8s_chart_version | length > 0 %}--version {{ victoria_metrics_k8s_chart_version }} \{% endif %}
+      -f {{ victoria_metrics_k8s_values_file }}
+  args:
+    executable: /bin/bash
+
+- name: Render Grafana IngressRoute
+  ansible.builtin.template:
+    src: grafana-ingressroute.yaml.j2
+    dest: /tmp/victoria-metrics-grafana-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: victoria_metrics_k8s_grafana_enabled | bool
+
+- name: Apply Grafana IngressRoute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/victoria-metrics-grafana-ingressroute.yaml
+  when: victoria_metrics_k8s_grafana_enabled | bool
+  changed_when: false

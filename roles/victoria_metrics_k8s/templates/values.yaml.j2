@@ -1,0 +1,42 @@
+grafana:
+  enabled: {{ victoria_metrics_k8s_grafana_enabled | lower }}
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+  persistence:
+    enabled: {{ victoria_metrics_k8s_persistence_enabled | lower }}
+{% if victoria_metrics_k8s_persistence_enabled %}
+    storageClassName: {{ victoria_metrics_k8s_default_storage_class }}
+    size: {{ victoria_metrics_k8s_grafana_size }}
+{% endif %}
+
+defaultDashboardsEnabled: true
+
+vmagent:
+  enabled: true
+
+vmsingle:
+  enabled: true
+  spec:
+{% if victoria_metrics_k8s_persistence_enabled %}
+    storage:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: {{ victoria_metrics_k8s_default_storage_class }}
+      resources:
+        requests:
+          storage: {{ victoria_metrics_k8s_vmstorage_size }}
+{% else %}
+    storage: {}
+{% endif %}
+
+alertmanager:
+  enabled: false
+
+kube-state-metrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true

@@ -1,0 +1,32 @@
+---
+- name: Wait for vmagent rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} rollout status deploy/{{ victoria_metrics_k8s_release_name }}-vmagent --timeout=300s
+  register: victoria_metrics_k8s_vmagent_rollout
+  changed_when: false
+
+- name: Wait for Grafana rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} rollout status deploy/{{ victoria_metrics_k8s_release_name }}-grafana --timeout=300s
+  register: victoria_metrics_k8s_grafana_rollout
+  changed_when: false
+  when: victoria_metrics_k8s_grafana_enabled | bool
+
+- name: Get monitoring pods
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get pods -o wide
+  register: victoria_metrics_k8s_pods
+  changed_when: false
+
+- name: Get monitoring services
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get svc
+  register: victoria_metrics_k8s_services
+  changed_when: false
+
+- name: Get monitoring ingressroutes
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get ingressroute
+  register: victoria_metrics_k8s_ingressroutes
+  changed_when: false
+  failed_when: false
