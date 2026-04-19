@@ -17,14 +17,14 @@
 - name: Render VictoriaMetrics Helm values
   ansible.builtin.template:
     src: values.yaml.j2
-    dest: "{{ victoria_metrics_k8s_values_file }}"
+    dest: "{{ victoria_metrics_k8s_values_file | default('/tmp/victoria-metrics-k8s-values.yaml') }}"
     owner: root
     group: root
     mode: "0644"
 
 - name: Add VictoriaMetrics Helm repo
   ansible.builtin.command:
-    cmd: "{{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} repo add {{ victoria_metrics_k8s_chart_repo_name }} {{ victoria_metrics_k8s_chart_repo_url }}"
+    cmd: "{{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} repo add {{ victoria_metrics_k8s_chart_repo_name }} {{ victoria_metrics_k8s_chart_repo_url }}"
   register: victoria_metrics_k8s_repo_add
   changed_when: "'has been added' in victoria_metrics_k8s_repo_add.stdout"
   failed_when:
@@ -33,7 +33,7 @@
 
 - name: Update Helm repos
   ansible.builtin.command:
-    cmd: "{{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} repo update"
+    cmd: "{{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} repo update"
   changed_when: false
 
 - name: Install or upgrade VictoriaMetrics K8s Stack via Helm
@@ -41,11 +41,11 @@
     set -o errexit
     set -o nounset
     set -o pipefail
-    {{ victoria_metrics_k8s_helm_binary_path }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path }} upgrade --install {{ victoria_metrics_k8s_release_name }} {{ victoria_metrics_k8s_chart_repo_name }}/{{ victoria_metrics_k8s_chart_name }} \
+    {{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} upgrade --install {{ victoria_metrics_k8s_release_name }} {{ victoria_metrics_k8s_chart_repo_name }}/{{ victoria_metrics_k8s_chart_name }} \
       --namespace {{ victoria_metrics_k8s_namespace }} \
       --create-namespace \
       {% if victoria_metrics_k8s_chart_version | length > 0 %}--version {{ victoria_metrics_k8s_chart_version }} \{% endif %}
-      -f {{ victoria_metrics_k8s_values_file }}
+      -f {{ victoria_metrics_k8s_values_file | default('/tmp/victoria-metrics-k8s-values.yaml') }}
   args:
     executable: /bin/bash
 
