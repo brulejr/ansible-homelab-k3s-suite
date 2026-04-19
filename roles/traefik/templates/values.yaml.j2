@@ -1,6 +1,11 @@
 deployment:
   enabled: true
 
+podDnsConfig:
+  options:
+    - name: ndots
+      value: "{{ traefik_dns_ndots }}"
+
 service:
   type: {{ traefik_service_type }}
 

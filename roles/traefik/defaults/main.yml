@@ -36,6 +36,9 @@ traefik_cloudflare_secret_name: traefik-cloudflare-api
 traefik_cloudflare_secret_key: api-token
 traefik_cloudflare_dns_api_token: ""
 
+# Pod DNS
+traefik_dns_ndots: "1"
+
 # Runtime
 traefik_values_file: /tmp/traefik-values.yaml
 traefik_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
