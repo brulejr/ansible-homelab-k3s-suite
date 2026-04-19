@@ -32,6 +32,12 @@ vmsingle:
     storage: {}
 {% endif %}
 
+vmalert:
+  enabled: true
+  spec:
+    extraArgs:
+      notifier.blackhole: "true"
+
 alertmanager:
   enabled: false
 
