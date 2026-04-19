@@ -1,8 +1,9 @@
 ---
 - name: Install VictoriaMetrics prerequisite packages
   ansible.builtin.package:
-    name: "{{ victoria_metrics_k8s_prerequisite_packages }}"
+    name: "{{ victoria_metrics_k8s_prerequisite_packages | default([]) }}"
     state: present
+  when: (victoria_metrics_k8s_prerequisite_packages | default([])) | length > 0
 
 - name: Ensure VictoriaMetrics namespace exists
   ansible.builtin.command:
