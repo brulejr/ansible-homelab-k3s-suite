@@ -1,22 +1,36 @@
 ---
-- name: Wait for vmagent rollout
-  ansible.builtin.command:
-    cmd: >-
-      /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }}
-      rollout status deploy/{{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }}-vmagent
-      --timeout=300s
+- name: Wait for vmagent deployment rollout
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    VMAGENT_DEPLOY=$(/usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get deploy -o name | grep vmagent | head -n 1)
+    test -n "$VMAGENT_DEPLOY"
+    /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} rollout status "$VMAGENT_DEPLOY" --timeout=300s
+  args:
+    executable: /bin/bash
   register: victoria_metrics_k8s_vmagent_rollout
   changed_when: false
 
-- name: Wait for Grafana rollout
-  ansible.builtin.command:
-    cmd: >-
-      /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }}
-      rollout status deploy/{{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }}-grafana
-      --timeout=300s
+- name: Wait for Grafana deployment rollout
+  ansible.builtin.shell: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    GRAFANA_DEPLOY=$(/usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get deploy -o name | grep grafana | head -n 1)
+    test -n "$GRAFANA_DEPLOY"
+    /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} rollout status "$GRAFANA_DEPLOY" --timeout=300s
+  args:
+    executable: /bin/bash
   register: victoria_metrics_k8s_grafana_rollout
   changed_when: false
   when: victoria_metrics_k8s_grafana_enabled | default(true) | bool
+
+- name: Get monitoring deployments
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get deploy -o wide
+  register: victoria_metrics_k8s_deployments
+  changed_when: false
 
 - name: Get monitoring pods
   ansible.builtin.command:
