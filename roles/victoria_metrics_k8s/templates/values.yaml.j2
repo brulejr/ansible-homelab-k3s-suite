@@ -1,15 +1,15 @@
 grafana:
-  enabled: {{ victoria_metrics_k8s_grafana_enabled | lower }}
+  enabled: {{ victoria_metrics_k8s_grafana_enabled | default(true) | lower }}
   sidecar:
     dashboards:
       enabled: true
     datasources:
       enabled: true
   persistence:
-    enabled: {{ victoria_metrics_k8s_persistence_enabled | lower }}
-{% if victoria_metrics_k8s_persistence_enabled %}
-    storageClassName: {{ victoria_metrics_k8s_default_storage_class }}
-    size: {{ victoria_metrics_k8s_grafana_size }}
+    enabled: {{ victoria_metrics_k8s_persistence_enabled | default(true) | lower }}
+{% if victoria_metrics_k8s_persistence_enabled | default(true) %}
+    storageClassName: {{ victoria_metrics_k8s_default_storage_class | default('longhorn') }}
+    size: {{ victoria_metrics_k8s_grafana_size | default('10Gi') }}
 {% endif %}
 
 defaultDashboardsEnabled: true
@@ -20,14 +20,14 @@ vmagent:
 vmsingle:
   enabled: true
   spec:
-{% if victoria_metrics_k8s_persistence_enabled %}
+{% if victoria_metrics_k8s_persistence_enabled | default(true) %}
     storage:
       accessModes:
         - ReadWriteOnce
-      storageClassName: {{ victoria_metrics_k8s_default_storage_class }}
+      storageClassName: {{ victoria_metrics_k8s_default_storage_class | default('longhorn') }}
       resources:
         requests:
-          storage: {{ victoria_metrics_k8s_vmstorage_size }}
+          storage: {{ victoria_metrics_k8s_vmstorage_size | default('20Gi') }}
 {% else %}
     storage: {}
 {% endif %}
