@@ -2,23 +2,23 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: victoria-metrics-grafana
-  namespace: {{ victoria_metrics_k8s_namespace }}
+  namespace: {{ victoria_metrics_k8s_namespace | default('monitoring') }}
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`{{ victoria_metrics_k8s_grafana_hostname }}`)
+    - match: Host(`{{ victoria_metrics_k8s_grafana_hostname | default('grafana.lab.example.com') }}`)
       kind: Rule
-{% if victoria_metrics_k8s_ui_middlewares | length > 0 %}
+{% if (victoria_metrics_k8s_ui_middlewares | default([])) | length > 0 %}
       middlewares:
 {% for middleware in victoria_metrics_k8s_ui_middlewares %}
         - name: {{ middleware }}
 {% endfor %}
 {% endif %}
       services:
-        - name: {{ victoria_metrics_k8s_release_name }}-grafana
+        - name: {{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }}-grafana
           port: 80
-{% if victoria_metrics_k8s_tls_enabled %}
+{% if victoria_metrics_k8s_tls_enabled | default(true) %}
   tls:
-    certResolver: {{ victoria_metrics_k8s_tls_cert_resolver }}
+    certResolver: {{ victoria_metrics_k8s_tls_cert_resolver | default('le') }}
 {% endif %}

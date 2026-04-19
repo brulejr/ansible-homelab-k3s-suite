@@ -7,7 +7,7 @@
 
 - name: Ensure VictoriaMetrics namespace exists
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl create namespace {{ victoria_metrics_k8s_namespace }}
+    cmd: /usr/local/bin/k3s kubectl create namespace {{ victoria_metrics_k8s_namespace | default('monitoring') }}
   register: victoria_metrics_k8s_namespace_create
   changed_when: "'created' in victoria_metrics_k8s_namespace_create.stdout"
   failed_when:
@@ -24,7 +24,12 @@
 
 - name: Add VictoriaMetrics Helm repo
   ansible.builtin.command:
-    cmd: "{{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} repo add {{ victoria_metrics_k8s_chart_repo_name }} {{ victoria_metrics_k8s_chart_repo_url }}"
+    cmd: >-
+      {{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }}
+      --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }}
+      repo add
+      {{ victoria_metrics_k8s_chart_repo_name | default('vm') }}
+      {{ victoria_metrics_k8s_chart_repo_url | default('https://victoriametrics.github.io/helm-charts/') }}
   register: victoria_metrics_k8s_repo_add
   changed_when: "'has been added' in victoria_metrics_k8s_repo_add.stdout"
   failed_when:
@@ -33,7 +38,10 @@
 
 - name: Update Helm repos
   ansible.builtin.command:
-    cmd: "{{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} repo update"
+    cmd: >-
+      {{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }}
+      --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }}
+      repo update
   changed_when: false
 
 - name: Install or upgrade VictoriaMetrics K8s Stack via Helm
@@ -41,10 +49,10 @@
     set -o errexit
     set -o nounset
     set -o pipefail
-    {{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} upgrade --install {{ victoria_metrics_k8s_release_name }} {{ victoria_metrics_k8s_chart_repo_name }}/{{ victoria_metrics_k8s_chart_name }} \
-      --namespace {{ victoria_metrics_k8s_namespace }} \
+    {{ victoria_metrics_k8s_helm_binary_path | default('/usr/local/bin/helm') }} --kubeconfig {{ victoria_metrics_k8s_kubeconfig_path | default('/etc/rancher/k3s/k3s.yaml') }} upgrade --install {{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }} {{ victoria_metrics_k8s_chart_repo_name | default('vm') }}/{{ victoria_metrics_k8s_chart_name | default('victoria-metrics-k8s-stack') }} \
+      --namespace {{ victoria_metrics_k8s_namespace | default('monitoring') }} \
       --create-namespace \
-      {% if victoria_metrics_k8s_chart_version | length > 0 %}--version {{ victoria_metrics_k8s_chart_version }} \{% endif %}
+      {% if (victoria_metrics_k8s_chart_version | default('')) | length > 0 %}--version {{ victoria_metrics_k8s_chart_version }} \{% endif %}
       -f {{ victoria_metrics_k8s_values_file | default('/tmp/victoria-metrics-k8s-values.yaml') }}
   args:
     executable: /bin/bash
@@ -56,10 +64,10 @@
     owner: root
     group: root
     mode: "0644"
-  when: victoria_metrics_k8s_grafana_enabled | bool
+  when: victoria_metrics_k8s_grafana_enabled | default(true) | bool
 
 - name: Apply Grafana IngressRoute
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f /tmp/victoria-metrics-grafana-ingressroute.yaml
-  when: victoria_metrics_k8s_grafana_enabled | bool
+  when: victoria_metrics_k8s_grafana_enabled | default(true) | bool
   changed_when: false
