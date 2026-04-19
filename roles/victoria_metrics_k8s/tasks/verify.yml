@@ -1,32 +1,38 @@
 ---
 - name: Wait for vmagent rollout
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} rollout status deploy/{{ victoria_metrics_k8s_release_name }}-vmagent --timeout=300s
+    cmd: >-
+      /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }}
+      rollout status deploy/{{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }}-vmagent
+      --timeout=300s
   register: victoria_metrics_k8s_vmagent_rollout
   changed_when: false
 
 - name: Wait for Grafana rollout
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} rollout status deploy/{{ victoria_metrics_k8s_release_name }}-grafana --timeout=300s
+    cmd: >-
+      /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }}
+      rollout status deploy/{{ victoria_metrics_k8s_release_name | default('victoria-metrics-k8s-stack') }}-grafana
+      --timeout=300s
   register: victoria_metrics_k8s_grafana_rollout
   changed_when: false
-  when: victoria_metrics_k8s_grafana_enabled | bool
+  when: victoria_metrics_k8s_grafana_enabled | default(true) | bool
 
 - name: Get monitoring pods
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get pods -o wide
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get pods -o wide
   register: victoria_metrics_k8s_pods
   changed_when: false
 
 - name: Get monitoring services
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get svc
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get svc
   register: victoria_metrics_k8s_services
   changed_when: false
 
 - name: Get monitoring ingressroutes
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace }} get ingressroute
+    cmd: /usr/local/bin/k3s kubectl -n {{ victoria_metrics_k8s_namespace | default('monitoring') }} get ingressroute
   register: victoria_metrics_k8s_ingressroutes
   changed_when: false
   failed_when: false
