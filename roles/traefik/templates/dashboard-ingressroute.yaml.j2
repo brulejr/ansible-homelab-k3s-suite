@@ -13,4 +13,4 @@ spec:
         - name: api@internal
           kind: TraefikService
   tls:
-    certResolver: le
+    certResolver: {{ traefik_acme_resolver_name }}

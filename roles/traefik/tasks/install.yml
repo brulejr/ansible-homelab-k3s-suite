@@ -35,6 +35,27 @@
     - traefik_namespace_create.rc != 0
     - "'AlreadyExists' not in traefik_namespace_create.stderr"
 
+- name: Render Traefik Cloudflare secret manifest
+  ansible.builtin.template:
+    src: cloudflare-secret.yaml.j2
+    dest: /tmp/traefik-cloudflare-secret.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - traefik_acme_enabled | bool
+    - traefik_acme_dns_challenge_enabled | bool
+    - traefik_acme_dns_provider == 'cloudflare'
+
+- name: Apply Traefik Cloudflare secret
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/traefik-cloudflare-secret.yaml
+  when:
+    - traefik_acme_enabled | bool
+    - traefik_acme_dns_challenge_enabled | bool
+    - traefik_acme_dns_provider == 'cloudflare'
+  changed_when: false
+
 - name: Render Traefik Helm values
   ansible.builtin.template:
     src: values.yaml.j2
@@ -71,3 +92,4 @@
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f /tmp/traefik-dashboard-ingressroute.yaml
   when: traefik_dashboard_enabled | bool
+  changed_when: false

@@ -16,3 +16,21 @@
     that:
       - not traefik_dashboard_enabled or (traefik_dashboard_hostname | length > 0)
     fail_msg: "traefik_dashboard_hostname must be defined when traefik_dashboard_enabled is true"
+
+- name: Assert ACME resolver name is defined when ACME enabled
+  ansible.builtin.assert:
+    that:
+      - not traefik_acme_enabled or (traefik_acme_resolver_name | length > 0)
+    fail_msg: "traefik_acme_resolver_name must be defined when traefik_acme_enabled is true"
+
+- name: Assert ACME DNS provider is defined when DNS challenge enabled
+  ansible.builtin.assert:
+    that:
+      - not traefik_acme_dns_challenge_enabled or (traefik_acme_dns_provider | length > 0)
+    fail_msg: "traefik_acme_dns_provider must be defined when traefik_acme_dns_challenge_enabled is true"
+
+- name: Assert Cloudflare token is defined when using Cloudflare DNS challenge
+  ansible.builtin.assert:
+    that:
+      - not (traefik_acme_dns_challenge_enabled and traefik_acme_dns_provider == 'cloudflare') or (traefik_cloudflare_dns_api_token | length > 0)
+    fail_msg: "traefik_cloudflare_dns_api_token must be defined when using Cloudflare DNS challenge"

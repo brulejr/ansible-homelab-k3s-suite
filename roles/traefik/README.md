@@ -9,49 +9,37 @@ This role owns:
 - Traefik namespace creation
 - Traefik Helm values rendering
 - Traefik Helm installation or upgrade
-- optional dashboard IngressRoute
-- rollout verification
+- Cloudflare credential secret creation for ACME DNS challenge
+- optional dashboard ingress route
+- basic rollout verification
 
 This role does not own:
 
 - K3S installation
 - application deployments
-- per-application ingress definitions
+- host-level Gitea TLS termination
+- per-application ingress definitions outside Traefik CRDs
 
-## Key variables
-
-### Release
+## Required variables
 
 - `traefik_namespace`
-- `traefik_release_name`
-- `traefik_chart_name`
-- `traefik_chart_repo_name`
-- `traefik_chart_repo_url`
-- `traefik_chart_version`
-
-### Service and ingress
-
 - `traefik_ingress_class_name`
 - `traefik_service_type`
 
-### Dashboard
+## ACME notes
 
-- `traefik_dashboard_enabled`
-- `traefik_dashboard_hostname`
+When `traefik_acme_enabled` is true:
 
-### ACME / TLS
+- `traefik_acme_email` must be defined
+- `traefik_acme_resolver_name` should be set
 
-- `traefik_acme_enabled`
-- `traefik_acme_email`
-- `traefik_acme_ca_server`
-- `traefik_acme_storage_path`
+When `traefik_acme_dns_challenge_enabled` is true:
 
-## Validation rules
-
-- `traefik_namespace` must be defined
-- when `traefik_acme_enabled` is true, `traefik_acme_email` must be defined
-- when `traefik_dashboard_enabled` is true, `traefik_dashboard_hostname` must be defined
+- `traefik_acme_dns_provider` must be defined
+- if using Cloudflare, `traefik_cloudflare_dns_api_token` must be supplied from the private inventory
 
 ## Notes
 
-This role is intended to provide shared ingress and TLS capabilities for cluster applications.
+This role is intended to handle TLS for cluster apps through Traefik.
+
+Host-level services such as `gitea_host` should use a separate TLS strategy.

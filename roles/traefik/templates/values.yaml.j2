@@ -25,13 +25,33 @@ api:
   dashboard: true
   insecure: false
 
+env:
+{% if traefik_acme_enabled and traefik_acme_dns_challenge_enabled and traefik_acme_dns_provider == 'cloudflare' %}
+  - name: CF_DNS_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: {{ traefik_cloudflare_secret_name }}
+        key: {{ traefik_cloudflare_secret_key }}
+{% endif %}
+
 additionalArguments:
+  - "--entryPoints.websecure.http.tls=true"
+  - "--log.level=INFO"
 {% if traefik_acme_enabled %}
-  - "--certificatesresolvers.le.acme.email={{ traefik_acme_email }}"
-  - "--certificatesresolvers.le.acme.storage={{ traefik_acme_storage_path }}"
-  - "--certificatesresolvers.le.acme.httpchallenge=true"
-  - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-  - "--certificatesresolvers.le.acme.caserver={{ traefik_acme_ca_server }}"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.email={{ traefik_acme_email }}"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.storage={{ traefik_acme_storage_path }}"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.caserver={{ traefik_acme_ca_server }}"
+{% if traefik_acme_dns_challenge_enabled %}
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.dnschallenge=true"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.dnschallenge.provider={{ traefik_acme_dns_provider }}"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.dnschallenge.delaybeforecheck={{ traefik_acme_dns_delay_before_check }}"
+{% if traefik_acme_dns_resolvers | length > 0 %}
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.dnschallenge.resolvers={{ traefik_acme_dns_resolvers | join(',') }}"
+{% endif %}
+{% else %}
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.httpchallenge=true"
+  - "--certificatesresolvers.{{ traefik_acme_resolver_name }}.acme.httpchallenge.entrypoint=web"
+{% endif %}
 {% endif %}
 
 persistence:
