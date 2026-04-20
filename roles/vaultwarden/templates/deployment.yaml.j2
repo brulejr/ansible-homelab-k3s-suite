@@ -22,9 +22,9 @@ spec:
             - name: DOMAIN
               value: {{ vaultwarden_domain | quote }}
             - name: SIGNUPS_ALLOWED
-              value: {{ vaultwarden_signups_allowed | ternary('true', 'false') | quote }}
+              value: "{{ 'true' if (vaultwarden_signups_allowed | bool) else 'false' }}"
             - name: WEBSOCKET_ENABLED
-              value: {{ vaultwarden_websocket_enabled | ternary('true', 'false') | quote }}
+              value: "{{ 'true' if (vaultwarden_websocket_enabled | bool) else 'false' }}"
             - name: LOG_LEVEL
               value: {{ vaultwarden_log_level | quote }}
             - name: ADMIN_TOKEN
@@ -42,7 +42,7 @@ spec:
             - name: SMTP_SECURITY
               value: {{ vaultwarden_smtp_security | quote }}
             - name: SMTP_PORT
-              value: {{ vaultwarden_smtp_port | string | quote }}
+              value: "{{ vaultwarden_smtp_port }}"
 {% if vaultwarden_smtp_username | length > 0 %}
             - name: SMTP_USERNAME
               valueFrom:
@@ -58,13 +58,13 @@ spec:
                   key: SMTP_PASSWORD
 {% endif %}
 {% endif %}
+{% if vaultwarden_persistence_enabled %}
           volumeMounts:
-{% if vaultwarden_persistence_enabled %}
             - name: data
-              mountPath: {{ vaultwarden_data_mount_path }}
+              mountPath: {{ vaultwarden_data_mount_path | quote }}
 {% endif %}
-      volumes:
 {% if vaultwarden_persistence_enabled %}
+      volumes:
         - name: data
           persistentVolumeClaim:
             claimName: {{ vaultwarden_app_name }}
