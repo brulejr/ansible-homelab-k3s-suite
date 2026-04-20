@@ -1,0 +1,33 @@
+---
+openwebrx_enabled: true
+
+# Identity
+openwebrx_namespace: apps
+openwebrx_app_name: openwebrx
+openwebrx_hostname: openwebrx.lab.example.com
+
+# Image/runtime
+openwebrx_image: jketterl/openwebrx:stable
+openwebrx_replicas: 1
+openwebrx_container_port: 8073
+openwebrx_service_port: 8073
+
+# Exposure
+openwebrx_ingress_enabled: true
+openwebrx_tls_enabled: true
+openwebrx_tls_cert_resolver: le
+openwebrx_ingress_middlewares: []
+
+# Persistence
+openwebrx_persistence_enabled: true
+openwebrx_storage_class: longhorn
+openwebrx_storage_size: 10Gi
+openwebrx_data_mount_path: /var/lib/openwebrx
+
+# Optional managed settings seed
+# Leave empty for first boot / web UI bootstrap.
+openwebrx_settings_json: ""
+
+# General env
+openwebrx_timezone: America/New_York
+openwebrx_extra_env: {}

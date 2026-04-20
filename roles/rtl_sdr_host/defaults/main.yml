@@ -1,0 +1,29 @@
+---
+rtl_sdr_host_enabled: true
+
+# Build source
+rtl_sdr_host_driver_flavor: blog
+rtl_sdr_host_repo_url_blog: https://github.com/rtlsdrblog/rtl-sdr-blog.git
+rtl_sdr_host_repo_url_osmocom: https://git.osmocom.org/rtl-sdr
+rtl_sdr_host_repo_version: main
+rtl_sdr_host_src_dir: /usr/local/src/rtl-sdr
+rtl_sdr_host_build_dir: /usr/local/src/rtl-sdr/build
+
+# Runtime
+rtl_sdr_host_device_index: 0
+rtl_sdr_host_tcp_bind_address: 0.0.0.0
+rtl_sdr_host_tcp_port: 1234
+rtl_sdr_host_tcp_ppm: 0
+rtl_sdr_host_tcp_gain: -10
+
+# Service
+rtl_sdr_host_service_name: rtl_tcp
+
+# Packages
+rtl_sdr_host_prerequisite_packages:
+  - git
+  - cmake
+  - build-essential
+  - pkg-config
+  - libusb-1.0-0-dev
+  - usbutils

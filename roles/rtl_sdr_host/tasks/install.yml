@@ -1,0 +1,101 @@
+---
+- name: Install RTL-SDR prerequisite packages
+  ansible.builtin.package:
+    name: "{{ rtl_sdr_host_prerequisite_packages }}"
+    state: present
+
+- name: Ensure RTL-SDR source parent exists
+  ansible.builtin.file:
+    path: /usr/local/src
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Clone RTL-SDR source repository
+  ansible.builtin.git:
+    repo: "{{ rtl_sdr_host_driver_flavor == 'blog' | ternary(rtl_sdr_host_repo_url_blog, rtl_sdr_host_repo_url_osmocom) }}"
+    dest: "{{ rtl_sdr_host_src_dir }}"
+    version: "{{ rtl_sdr_host_repo_version }}"
+    force: true
+
+- name: Ensure RTL-SDR build directory exists
+  ansible.builtin.file:
+    path: "{{ rtl_sdr_host_build_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure RTL-SDR build
+  ansible.builtin.command:
+    cmd: cmake .. -DINSTALL_UDEV_RULES=ON
+    chdir: "{{ rtl_sdr_host_build_dir }}"
+  changed_when: false
+
+- name: Build RTL-SDR userspace
+  ansible.builtin.command:
+    cmd: make -j{{ ansible_processor_vcpus | default(2) }}
+    chdir: "{{ rtl_sdr_host_build_dir }}"
+  changed_when: false
+
+- name: Install RTL-SDR userspace
+  ansible.builtin.command:
+    cmd: make install
+    chdir: "{{ rtl_sdr_host_build_dir }}"
+  changed_when: false
+
+- name: Refresh shared library cache
+  ansible.builtin.command:
+    cmd: ldconfig
+  changed_when: false
+
+- name: Install RTL-SDR udev rules
+  ansible.builtin.copy:
+    src: "{{ rtl_sdr_host_src_dir }}/rtl-sdr.rules"
+    dest: /etc/udev/rules.d/rtl-sdr.rules
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install DVB blacklist config
+  ansible.builtin.template:
+    src: blacklist-rtl.conf.j2
+    dest: /etc/modprobe.d/blacklist-rtl.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Update initramfs after DVB blacklist change
+  ansible.builtin.command:
+    cmd: update-initramfs -u
+  changed_when: false
+
+- name: Reload udev rules
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
+  changed_when: false
+
+- name: Trigger udev
+  ansible.builtin.command:
+    cmd: udevadm trigger
+  changed_when: false
+
+- name: Render rtl_tcp systemd service
+  ansible.builtin.template:
+    src: rtl_tcp.service.j2
+    dest: "/etc/systemd/system/{{ rtl_sdr_host_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart rtl_tcp
+
+- name: Ensure rtl_tcp service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ rtl_sdr_host_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

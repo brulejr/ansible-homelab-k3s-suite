@@ -1,0 +1,12 @@
+---
+- name: Validate rtl_sdr_host configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: rtl_sdr_host_enabled | bool
+
+- name: Install and configure rtl_sdr_host
+  ansible.builtin.include_tasks: install.yml
+  when: rtl_sdr_host_enabled | bool
+
+- name: Verify rtl_sdr_host
+  ansible.builtin.include_tasks: verify.yml
+  when: rtl_sdr_host_enabled | bool

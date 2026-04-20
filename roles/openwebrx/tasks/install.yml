@@ -1,0 +1,84 @@
+---
+- name: Render OpenWebRX namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply OpenWebRX namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render OpenWebRX settings configmap manifest
+  ansible.builtin.template:
+    src: settings-configmap.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-settings-configmap.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: openwebrx_settings_json | length > 0
+
+- name: Apply OpenWebRX settings configmap manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-settings-configmap.yaml
+  changed_when: false
+  when: openwebrx_settings_json | length > 0
+
+- name: Render OpenWebRX PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: openwebrx_persistence_enabled | bool
+
+- name: Apply OpenWebRX PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-pvc.yaml
+  changed_when: false
+  when: openwebrx_persistence_enabled | bool
+
+- name: Render OpenWebRX deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply OpenWebRX deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render OpenWebRX service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply OpenWebRX service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-service.yaml
+  changed_when: false
+
+- name: Render OpenWebRX IngressRoute manifest
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/{{ openwebrx_app_name }}-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: openwebrx_ingress_enabled | bool
+
+- name: Apply OpenWebRX IngressRoute manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ openwebrx_app_name }}-ingressroute.yaml
+  changed_when: false
+  when: openwebrx_ingress_enabled | bool

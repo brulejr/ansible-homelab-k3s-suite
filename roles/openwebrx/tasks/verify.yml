@@ -1,0 +1,18 @@
+---
+- name: Wait for OpenWebRX deployment rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ openwebrx_namespace }} rollout status deploy/{{ openwebrx_app_name }} --timeout=180s
+  changed_when: false
+
+- name: Get OpenWebRX objects
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ openwebrx_namespace }} get deploy,pods,svc,pvc
+  register: openwebrx_objects
+  changed_when: false
+
+- name: Get OpenWebRX ingressroute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ openwebrx_namespace }} get ingressroute {{ openwebrx_app_name }} -o yaml
+  register: openwebrx_ingress
+  changed_when: false
+  when: openwebrx_ingress_enabled | bool

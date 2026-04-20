@@ -1,0 +1,12 @@
+---
+- name: Validate openwebrx configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: openwebrx_enabled | bool
+
+- name: Install and configure openwebrx
+  ansible.builtin.include_tasks: install.yml
+  when: openwebrx_enabled | bool
+
+- name: Verify openwebrx
+  ansible.builtin.include_tasks: verify.yml
+  when: openwebrx_enabled | bool

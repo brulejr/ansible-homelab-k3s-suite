@@ -1,0 +1,19 @@
+---
+- name: Assert RTL-SDR driver flavor is valid
+  ansible.builtin.assert:
+    that:
+      - rtl_sdr_host_driver_flavor in ['blog', 'osmocom']
+    fail_msg: "rtl_sdr_host_driver_flavor must be 'blog' or 'osmocom'"
+
+- name: Assert rtl_tcp bind port is valid
+  ansible.builtin.assert:
+    that:
+      - rtl_sdr_host_tcp_port | int > 0
+      - rtl_sdr_host_tcp_port | int < 65536
+    fail_msg: "rtl_sdr_host_tcp_port must be a valid TCP port"
+
+- name: Assert device index is non-negative
+  ansible.builtin.assert:
+    that:
+      - rtl_sdr_host_device_index | int >= 0
+    fail_msg: "rtl_sdr_host_device_index must be >= 0"

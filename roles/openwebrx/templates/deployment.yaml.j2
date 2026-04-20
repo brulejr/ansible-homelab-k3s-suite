@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ openwebrx_app_name }}
+  namespace: {{ openwebrx_namespace }}
+spec:
+  replicas: {{ openwebrx_replicas }}
+  selector:
+    matchLabels:
+      app: {{ openwebrx_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ openwebrx_app_name }}
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: {{ openwebrx_app_name }}
+          image: {{ openwebrx_image }}
+          ports:
+            - containerPort: {{ openwebrx_container_port }}
+          env:
+            - name: TZ
+              value: {{ openwebrx_timezone | quote }}
+{% for env_name, env_value in openwebrx_extra_env.items() %}
+            - name: {{ env_name }}
+              value: {{ env_value | quote }}
+{% endfor %}
+          volumeMounts:
+{% if openwebrx_persistence_enabled %}
+            - name: data
+              mountPath: {{ openwebrx_data_mount_path | quote }}
+{% endif %}
+{% if openwebrx_settings_json | length > 0 %}
+            - name: settings
+              mountPath: /var/lib/openwebrx/settings.json
+              subPath: settings.json
+{% endif %}
+      volumes:
+{% if openwebrx_persistence_enabled %}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ openwebrx_app_name }}
+{% endif %}
+{% if openwebrx_settings_json | length > 0 %}
+        - name: settings
+          configMap:
+            name: {{ openwebrx_app_name }}-settings
+{% endif %}

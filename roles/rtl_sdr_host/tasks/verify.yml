@@ -1,0 +1,33 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert rtl_tcp service exists
+  ansible.builtin.assert:
+    that:
+      - (rtl_sdr_host_service_name ~ '.service') in ansible_facts.services
+    fail_msg: "rtl_tcp systemd service was not found"
+
+- name: Assert rtl_tcp service is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services[rtl_sdr_host_service_name ~ '.service'].state == 'running'
+    fail_msg: "rtl_tcp service is not running"
+
+- name: Wait for rtl_tcp port
+  ansible.builtin.wait_for:
+    host: "127.0.0.1"
+    port: "{{ rtl_sdr_host_tcp_port }}"
+    timeout: 30
+
+- name: Check rtl_tcp listener
+  ansible.builtin.command:
+    cmd: ss -ltnp
+  register: rtl_sdr_host_ss
+  changed_when: false
+
+- name: Assert rtl_tcp is listening on expected port
+  ansible.builtin.assert:
+    that:
+      - "(':' ~ (rtl_sdr_host_tcp_port | string)) in rtl_sdr_host_ss.stdout"
+    fail_msg: "rtl_tcp is not listening on the expected port"

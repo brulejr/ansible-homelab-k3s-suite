@@ -1,0 +1,14 @@
+[Unit]
+Description=RTL-SDR rtl_tcp server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rtl_tcp -a {{ rtl_sdr_host_tcp_bind_address }} -p {{ rtl_sdr_host_tcp_port }} -d {{ rtl_sdr_host_device_index }} -P {{ rtl_sdr_host_tcp_ppm }} -g {{ rtl_sdr_host_tcp_gain }}
+Restart=always
+RestartSec=2
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

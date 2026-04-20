@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ openwebrx_app_name }}
+  namespace: {{ openwebrx_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ openwebrx_storage_size }}
+{% if openwebrx_storage_class | length > 0 %}
+  storageClassName: {{ openwebrx_storage_class }}
+{% endif %}

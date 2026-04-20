@@ -1,0 +1,25 @@
+---
+- name: Assert OpenWebRX namespace is defined
+  ansible.builtin.assert:
+    that:
+      - openwebrx_namespace | length > 0
+    fail_msg: "openwebrx_namespace must be defined"
+
+- name: Assert OpenWebRX hostname is defined when ingress enabled
+  ansible.builtin.assert:
+    that:
+      - not openwebrx_ingress_enabled or (openwebrx_hostname | length > 0)
+    fail_msg: "openwebrx_hostname must be defined when openwebrx_ingress_enabled is true"
+
+- name: Assert OpenWebRX service port is valid
+  ansible.builtin.assert:
+    that:
+      - openwebrx_service_port | int > 0
+      - openwebrx_service_port | int < 65536
+    fail_msg: "openwebrx_service_port must be a valid TCP port"
+
+- name: Assert OpenWebRX storage class is set when persistence enabled
+  ansible.builtin.assert:
+    that:
+      - not openwebrx_persistence_enabled or (openwebrx_storage_class | length > 0)
+    fail_msg: "openwebrx_storage_class must be defined when openwebrx_persistence_enabled is true"

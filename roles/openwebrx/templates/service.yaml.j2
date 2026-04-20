@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ openwebrx_app_name }}
+  namespace: {{ openwebrx_namespace }}
+spec:
+  selector:
+    app: {{ openwebrx_app_name }}
+  ports:
+    - name: http
+      port: {{ openwebrx_service_port }}
+      targetPort: {{ openwebrx_container_port }}
+      protocol: TCP
