@@ -1,0 +1,37 @@
+---
+- name: Assert Node-RED namespace is defined
+  ansible.builtin.assert:
+    that:
+      - nodered_namespace | length > 0
+    fail_msg: "nodered_namespace must be defined"
+
+- name: Assert Node-RED hostname is defined when ingress enabled
+  ansible.builtin.assert:
+    that:
+      - not nodered_ingress_enabled or (nodered_hostname | length > 0)
+    fail_msg: "nodered_hostname must be defined when nodered_ingress_enabled is true"
+
+- name: Assert Node-RED replicas is valid
+  ansible.builtin.assert:
+    that:
+      - nodered_replicas | int > 0
+    fail_msg: "nodered_replicas must be greater than 0"
+
+- name: Assert Node-RED service port is valid
+  ansible.builtin.assert:
+    that:
+      - nodered_service_port | int > 0
+      - nodered_service_port | int < 65536
+    fail_msg: "nodered_service_port must be a valid TCP port"
+
+- name: Assert Node-RED storage class is set when persistence enabled
+  ansible.builtin.assert:
+    that:
+      - not nodered_persistence_enabled or (nodered_storage_class | length > 0)
+    fail_msg: "nodered_storage_class must be defined when nodered_persistence_enabled is true"
+
+- name: Assert Node-RED bcrypt hash is set when admin auth enabled
+  ansible.builtin.assert:
+    that:
+      - not nodered_admin_auth_enabled or (nodered_admin_password_bcrypt | length > 0)
+    fail_msg: "nodered_admin_password_bcrypt must be defined when nodered_admin_auth_enabled is true"

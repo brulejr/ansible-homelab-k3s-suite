@@ -1,0 +1,47 @@
+---
+nodered_enabled: true
+
+# Identity
+nodered_namespace: apps
+nodered_app_name: nodered
+nodered_hostname: nodered.lab.example.com
+
+# Image/runtime
+nodered_image: nodered/node-red:latest
+nodered_replicas: 1
+nodered_container_port: 1880
+nodered_service_port: 1880
+
+# Exposure
+nodered_ingress_enabled: true
+nodered_ingress_class_name: traefik
+nodered_ingress_middlewares: []
+nodered_tls_enabled: true
+nodered_tls_cert_resolver: le
+
+# Persistence
+nodered_persistence_enabled: true
+nodered_storage_class: longhorn
+nodered_storage_size: 5Gi
+nodered_data_mount_path: /data
+
+# Node-RED runtime config
+nodered_editor_title: "Node-RED"
+nodered_timezone: America/New_York
+nodered_context_store_enabled: true
+nodered_projects_enabled: false
+nodered_safe_mode: false
+
+# Optional admin auth
+nodered_admin_auth_enabled: false
+nodered_admin_username: admin
+nodered_admin_password_bcrypt: ""
+
+# Optional credential secret for flows
+nodered_credential_secret: ""
+
+# Optional extra npm modules installed at container start
+nodered_extra_palette_modules: []
+
+# Optional node-red env vars
+nodered_extra_env: {}

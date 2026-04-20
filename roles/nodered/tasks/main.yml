@@ -1,0 +1,12 @@
+---
+- name: Validate nodered configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: nodered_enabled | bool
+
+- name: Install and configure nodered
+  ansible.builtin.include_tasks: install.yml
+  when: nodered_enabled | bool
+
+- name: Verify nodered
+  ansible.builtin.include_tasks: verify.yml
+  when: nodered_enabled | bool

@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ nodered_app_name }}
+  namespace: {{ nodered_namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ nodered_hostname }}`)
+      kind: Rule
+{% if nodered_ingress_middlewares | length > 0 %}
+      middlewares:
+{% for middleware in nodered_ingress_middlewares %}
+        - name: {{ middleware }}
+{% endfor %}
+{% endif %}
+      services:
+        - name: {{ nodered_app_name }}
+          port: {{ nodered_service_port }}
+{% if nodered_tls_enabled %}
+  tls:
+    certResolver: {{ nodered_tls_cert_resolver }}
+{% endif %}

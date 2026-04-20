@@ -1,0 +1,32 @@
+---
+- name: Wait for Node-RED deployment rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ nodered_namespace }} rollout status deploy/{{ nodered_app_name }} --timeout=180s
+  register: nodered_rollout
+  changed_when: false
+
+- name: Get Node-RED pods
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ nodered_namespace }} get pods -o wide
+  register: nodered_pods
+  changed_when: false
+
+- name: Get Node-RED service
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ nodered_namespace }} get svc {{ nodered_app_name }}
+  register: nodered_service
+  changed_when: false
+
+- name: Get Node-RED PVC
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ nodered_namespace }} get pvc {{ nodered_app_name }}
+  register: nodered_pvc
+  changed_when: false
+  when: nodered_persistence_enabled | bool
+
+- name: Get Node-RED ingressroute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ nodered_namespace }} get ingressroute {{ nodered_app_name }}
+  register: nodered_ingressroute
+  changed_when: false
+  when: nodered_ingress_enabled | bool

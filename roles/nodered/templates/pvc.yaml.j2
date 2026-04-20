@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ nodered_app_name }}
+  namespace: {{ nodered_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ nodered_storage_size }}
+{% if nodered_storage_class | length > 0 %}
+  storageClassName: {{ nodered_storage_class }}
+{% endif %}

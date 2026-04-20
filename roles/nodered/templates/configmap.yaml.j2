@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ nodered_app_name }}-settings
+  namespace: {{ nodered_namespace }}
+data:
+  settings.js: |
+    module.exports = {
+      uiPort: process.env.PORT || {{ nodered_container_port }},
+      flowFile: 'flows.json',
+      flowFilePretty: true,
+      editorTheme: {
+        page: {
+          title: {{ nodered_editor_title | tojson }}
+        }
+      },
+{% if nodered_context_store_enabled %}
+      contextStorage: {
+        default: {
+          module: "localfilesystem"
+        }
+      },
+{% endif %}
+{% if nodered_credential_secret | length > 0 %}
+      credentialSecret: {{ nodered_credential_secret | tojson }},
+{% endif %}
+      projects: {
+        enabled: {{ 'true' if (nodered_projects_enabled | bool) else 'false' }}
+      },
+{% if nodered_admin_auth_enabled %}
+      adminAuth: {
+        type: "credentials",
+        users: [{
+          username: {{ nodered_admin_username | tojson }},
+          password: {{ nodered_admin_password_bcrypt | tojson }},
+          permissions: "*"
+        }]
+      },
+{% endif %}
+    };

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ nodered_app_name }}
+  namespace: {{ nodered_namespace }}
+spec:
+  replicas: {{ nodered_replicas }}
+  selector:
+    matchLabels:
+      app: {{ nodered_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ nodered_app_name }}
+    spec:
+      containers:
+        - name: {{ nodered_app_name }}
+          image: {{ nodered_image }}
+          ports:
+            - containerPort: {{ nodered_container_port }}
+          env:
+            - name: TZ
+              value: {{ nodered_timezone | quote }}
+{% if nodered_safe_mode %}
+            - name: NODE_RED_ENABLE_SAFE_MODE
+              value: "true"
+{% endif %}
+{% if nodered_extra_palette_modules | length > 0 %}
+            - name: NODE_RED_ENABLE_PROJECTS
+              value: "{{ 'true' if (nodered_projects_enabled | bool) else 'false' }}"
+{% endif %}
+{% for env_name, env_value in nodered_extra_env.items() %}
+            - name: {{ env_name }}
+              value: {{ env_value | quote }}
+{% endfor %}
+          volumeMounts:
+            - name: settings
+              mountPath: /data/settings.js
+              subPath: settings.js
+{% if nodered_persistence_enabled %}
+            - name: data
+              mountPath: {{ nodered_data_mount_path | quote }}
+{% endif %}
+      volumes:
+        - name: settings
+          configMap:
+            name: {{ nodered_app_name }}-settings
+{% if nodered_persistence_enabled %}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ nodered_app_name }}
+{% endif %}

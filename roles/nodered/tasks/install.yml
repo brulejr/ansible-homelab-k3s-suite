@@ -1,0 +1,82 @@
+---
+- name: Render Node-RED namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Node-RED namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render Node-RED settings configmap manifest
+  ansible.builtin.template:
+    src: configmap.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-configmap.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Node-RED settings configmap manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-configmap.yaml
+  changed_when: false
+
+- name: Render Node-RED PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: nodered_persistence_enabled | bool
+
+- name: Apply Node-RED PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-pvc.yaml
+  changed_when: false
+  when: nodered_persistence_enabled | bool
+
+- name: Render Node-RED deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Node-RED deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render Node-RED service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Node-RED service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-service.yaml
+  changed_when: false
+
+- name: Render Node-RED IngressRoute manifest
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/{{ nodered_app_name }}-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: nodered_ingress_enabled | bool
+
+- name: Apply Node-RED IngressRoute manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ nodered_app_name }}-ingressroute.yaml
+  changed_when: false
+  when: nodered_ingress_enabled | bool
