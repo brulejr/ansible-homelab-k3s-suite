@@ -13,6 +13,8 @@ spec:
       labels:
         app: {{ nodered_app_name }}
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: {{ nodered_app_name }}
           image: {{ nodered_image }}
