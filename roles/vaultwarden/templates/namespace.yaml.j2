@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ vaultwarden_app_name }}
+  namespace: {{ vaultwarden_namespace }}
+type: Opaque
+stringData:
+  ADMIN_TOKEN: {{ vaultwarden_admin_token | quote }}
+{% if vaultwarden_smtp_username | length > 0 %}
+  SMTP_USERNAME: {{ vaultwarden_smtp_username | quote }}
+{% endif %}
+{% if vaultwarden_smtp_password | length > 0 %}
+  SMTP_PASSWORD: {{ vaultwarden_smtp_password | quote }}
+{% endif %}

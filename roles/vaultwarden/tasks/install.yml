@@ -1,0 +1,82 @@
+---
+- name: Render Vaultwarden namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Vaultwarden namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render Vaultwarden secret manifest
+  ansible.builtin.template:
+    src: secret.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-secret.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Vaultwarden secret manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-secret.yaml
+  changed_when: false
+
+- name: Render Vaultwarden PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: vaultwarden_persistence_enabled | bool
+
+- name: Apply Vaultwarden PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-pvc.yaml
+  changed_when: false
+  when: vaultwarden_persistence_enabled | bool
+
+- name: Render Vaultwarden deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Vaultwarden deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render Vaultwarden service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Vaultwarden service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-service.yaml
+  changed_when: false
+
+- name: Render Vaultwarden IngressRoute manifest
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/{{ vaultwarden_app_name }}-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: vaultwarden_ingress_enabled | bool
+
+- name: Apply Vaultwarden IngressRoute manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ vaultwarden_app_name }}-ingressroute.yaml
+  changed_when: false
+  when: vaultwarden_ingress_enabled | bool

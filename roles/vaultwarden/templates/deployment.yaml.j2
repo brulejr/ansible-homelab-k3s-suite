@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ vaultwarden_app_name }}
+  namespace: {{ vaultwarden_namespace }}
+spec:
+  replicas: {{ vaultwarden_replicas }}
+  selector:
+    matchLabels:
+      app: {{ vaultwarden_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ vaultwarden_app_name }}
+    spec:
+      containers:
+        - name: {{ vaultwarden_app_name }}
+          image: {{ vaultwarden_image }}
+          ports:
+            - containerPort: {{ vaultwarden_container_port }}
+          env:
+            - name: DOMAIN
+              value: {{ vaultwarden_domain | quote }}
+            - name: SIGNUPS_ALLOWED
+              value: {{ vaultwarden_signups_allowed | ternary('true', 'false') | quote }}
+            - name: WEBSOCKET_ENABLED
+              value: {{ vaultwarden_websocket_enabled | ternary('true', 'false') | quote }}
+            - name: LOG_LEVEL
+              value: {{ vaultwarden_log_level | quote }}
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ vaultwarden_app_name }}
+                  key: ADMIN_TOKEN
+{% if vaultwarden_smtp_host | length > 0 %}
+            - name: SMTP_HOST
+              value: {{ vaultwarden_smtp_host | quote }}
+            - name: SMTP_FROM
+              value: {{ vaultwarden_smtp_from | quote }}
+            - name: SMTP_FROM_NAME
+              value: {{ vaultwarden_smtp_from_name | quote }}
+            - name: SMTP_SECURITY
+              value: {{ vaultwarden_smtp_security | quote }}
+            - name: SMTP_PORT
+              value: {{ vaultwarden_smtp_port | string | quote }}
+{% if vaultwarden_smtp_username | length > 0 %}
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ vaultwarden_app_name }}
+                  key: SMTP_USERNAME
+{% endif %}
+{% if vaultwarden_smtp_password | length > 0 %}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ vaultwarden_app_name }}
+                  key: SMTP_PASSWORD
+{% endif %}
+{% endif %}
+          volumeMounts:
+{% if vaultwarden_persistence_enabled %}
+            - name: data
+              mountPath: {{ vaultwarden_data_mount_path }}
+{% endif %}
+      volumes:
+{% if vaultwarden_persistence_enabled %}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ vaultwarden_app_name }}
+{% endif %}

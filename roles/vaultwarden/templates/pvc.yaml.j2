@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ vaultwarden_app_name }}
+  namespace: {{ vaultwarden_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ vaultwarden_storage_size }}
+{% if vaultwarden_storage_class | length > 0 %}
+  storageClassName: {{ vaultwarden_storage_class }}
+{% endif %}

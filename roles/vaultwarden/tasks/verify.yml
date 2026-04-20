@@ -1,0 +1,25 @@
+---
+- name: Wait for Vaultwarden deployment rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ vaultwarden_namespace }} rollout status deploy/{{ vaultwarden_app_name }} --timeout=180s
+  register: vaultwarden_rollout
+  changed_when: false
+
+- name: Get Vaultwarden pods
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ vaultwarden_namespace }} get pods -o wide
+  register: vaultwarden_pods
+  changed_when: false
+
+- name: Get Vaultwarden service
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ vaultwarden_namespace }} get svc {{ vaultwarden_app_name }}
+  register: vaultwarden_service
+  changed_when: false
+
+- name: Get Vaultwarden ingressroute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ vaultwarden_namespace }} get ingressroute {{ vaultwarden_app_name }}
+  register: vaultwarden_ingressroute
+  changed_when: false
+  when: vaultwarden_ingress_enabled | bool

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ vaultwarden_app_name }}
+  namespace: {{ vaultwarden_namespace }}
+spec:
+  selector:
+    app: {{ vaultwarden_app_name }}
+  ports:
+    - name: http
+      port: {{ vaultwarden_service_port }}
+      targetPort: {{ vaultwarden_container_port }}
+      protocol: TCP

@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ vaultwarden_app_name }}
+  namespace: {{ vaultwarden_namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ vaultwarden_hostname }}`)
+      kind: Rule
+      services:
+        - name: {{ vaultwarden_app_name }}
+          port: {{ vaultwarden_service_port }}
+{% if vaultwarden_ingress_middlewares | length > 0 %}
+      middlewares:
+{% for middleware in vaultwarden_ingress_middlewares %}
+        - name: {{ middleware.name }}
+{% if middleware.namespace is defined %}
+          namespace: {{ middleware.namespace }}
+{% endif %}
+{% endfor %}
+{% endif %}
+  tls:
+{% if vaultwarden_tls_enabled %}
+    certResolver: {{ vaultwarden_tls_cert_resolver }}
+{% endif %}

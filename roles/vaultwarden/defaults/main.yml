@@ -1,0 +1,42 @@
+---
+vaultwarden_enabled: true
+
+# Identity
+vaultwarden_namespace: apps
+vaultwarden_app_name: vaultwarden
+vaultwarden_hostname: vault.lab.example.com
+
+# Image/runtime
+vaultwarden_image: vaultwarden/server:latest
+vaultwarden_replicas: 1
+vaultwarden_container_port: 80
+vaultwarden_service_port: 80
+
+# Exposure
+vaultwarden_ingress_enabled: true
+vaultwarden_ingress_class_name: traefik
+vaultwarden_ingress_middlewares: []
+vaultwarden_tls_enabled: true
+vaultwarden_tls_cert_resolver: le
+
+# Persistence
+vaultwarden_persistence_enabled: true
+vaultwarden_storage_class: longhorn
+vaultwarden_storage_size: 5Gi
+vaultwarden_data_mount_path: /data
+
+# App config
+vaultwarden_domain: "https://{{ vaultwarden_hostname }}"
+vaultwarden_signups_allowed: false
+vaultwarden_websocket_enabled: true
+vaultwarden_log_level: info
+vaultwarden_admin_token: ""
+
+# Optional future settings
+vaultwarden_smtp_host: ""
+vaultwarden_smtp_from: ""
+vaultwarden_smtp_from_name: Vaultwarden
+vaultwarden_smtp_username: ""
+vaultwarden_smtp_password: ""
+vaultwarden_smtp_security: starttls
+vaultwarden_smtp_port: 587
