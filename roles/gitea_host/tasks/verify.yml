@@ -37,7 +37,7 @@
 - name: Wait for Nginx HTTPS port when TLS enabled
   ansible.builtin.wait_for:
     host: "127.0.0.1"
-    port: 443
+    port: "{{ gitea_host_nginx_https_port }}"
     timeout: 30
   when:
     - gitea_host_nginx_enabled | bool
@@ -45,7 +45,7 @@
 
 - name: Check local HTTPS response for Gitea
   ansible.builtin.command:
-    cmd: curl -kI https://{{ gitea_host_domain }}
+    cmd: curl -kI https://{{ gitea_host_domain }}:{{ gitea_host_nginx_https_port }}
   changed_when: false
   when:
     - gitea_host_nginx_enabled | bool

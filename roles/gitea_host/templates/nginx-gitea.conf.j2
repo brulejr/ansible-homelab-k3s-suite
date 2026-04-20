@@ -1,6 +1,6 @@
 server {
-    listen 80;
-    listen [::]:80;
+    listen {{ gitea_host_nginx_http_port }};
+    listen [::]:{{ gitea_host_nginx_http_port }};
     server_name {{ gitea_host_domain }};
 
     location /.well-known/acme-challenge/ {
@@ -8,13 +8,13 @@ server {
     }
 
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://$host:{{ gitea_host_nginx_https_port }}$request_uri;
     }
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen {{ gitea_host_nginx_https_port }} ssl http2;
+    listen [::]:{{ gitea_host_nginx_https_port }} ssl http2;
     server_name {{ gitea_host_domain }};
 
     access_log {{ gitea_host_nginx_access_log }};

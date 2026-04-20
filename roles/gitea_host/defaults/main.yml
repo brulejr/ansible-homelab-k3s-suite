@@ -25,7 +25,7 @@ gitea_host_http_port: 3000
 gitea_host_ssh_listen: "0.0.0.0"
 gitea_host_ssh_port: 2222
 gitea_host_domain: gitea.lab.example.com
-gitea_host_root_url: "https://{{ gitea_host_domain }}/"
+gitea_host_root_url: "https://{{ gitea_host_domain }}:8443/"
 
 # Database
 gitea_host_db_type: sqlite3
@@ -51,6 +51,8 @@ gitea_host_nginx_site_name: gitea
 gitea_host_nginx_access_log: "/var/log/nginx/gitea.access.log"
 gitea_host_nginx_error_log: "/var/log/nginx/gitea.error.log"
 gitea_host_nginx_client_max_body_size: "512M"
+gitea_host_nginx_http_port: 80
+gitea_host_nginx_https_port: 8443
 
 # Certbot / Cloudflare DNS challenge
 gitea_host_tls_enabled: true
