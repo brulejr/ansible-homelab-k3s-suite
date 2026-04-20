@@ -7,6 +7,10 @@
   ansible.builtin.include_tasks: install.yml
   when: gitea_host_enabled | bool
 
+- name: Flush handlers before verification
+  ansible.builtin.meta: flush_handlers
+  when: gitea_host_enabled | bool
+
 - name: Verify gitea_host
   ansible.builtin.include_tasks: verify.yml
   when: gitea_host_enabled | bool

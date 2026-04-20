@@ -5,7 +5,7 @@
 - name: Assert Gitea service exists
   ansible.builtin.assert:
     that:
-      - "'{{ gitea_host_service_name }}.service' in ansible_facts.services"
+      - (gitea_host_service_name ~ '.service') in ansible_facts.services
     fail_msg: "Gitea systemd service was not found"
 
 - name: Assert Gitea service is running
