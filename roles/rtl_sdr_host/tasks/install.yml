@@ -14,7 +14,7 @@
 
 - name: Clone RTL-SDR source repository
   ansible.builtin.git:
-    repo: "{{ rtl_sdr_host_driver_flavor == 'blog' | ternary(rtl_sdr_host_repo_url_blog, rtl_sdr_host_repo_url_osmocom) }}"
+    repo: "{{ (rtl_sdr_host_driver_flavor == 'blog') | ternary(rtl_sdr_host_repo_url_blog, rtl_sdr_host_repo_url_osmocom) }}"
     dest: "{{ rtl_sdr_host_src_dir }}"
     version: "{{ rtl_sdr_host_repo_version }}"
     force: true
