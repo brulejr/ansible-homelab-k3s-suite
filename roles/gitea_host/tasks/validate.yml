@@ -34,3 +34,21 @@
     that:
       - gitea_host_db_type == 'sqlite3' or gitea_host_db_host | length > 0
     fail_msg: "gitea_host_db_host must be defined when gitea_host_db_type is not sqlite3"
+
+- name: Assert Gitea HTTP listen address is localhost when Nginx enabled
+  ansible.builtin.assert:
+    that:
+      - not (gitea_host_nginx_enabled | bool) or gitea_host_http_listen == '127.0.0.1'
+    fail_msg: "gitea_host_http_listen must be 127.0.0.1 when gitea_host_nginx_enabled is true"
+
+- name: Assert Certbot email is defined when TLS enabled
+  ansible.builtin.assert:
+    that:
+      - not (gitea_host_tls_enabled | bool) or (gitea_host_certbot_email | length > 0)
+    fail_msg: "gitea_host_certbot_email must be defined when gitea_host_tls_enabled is true"
+
+- name: Assert Cloudflare API token is defined when TLS enabled
+  ansible.builtin.assert:
+    that:
+      - not (gitea_host_tls_enabled | bool) or (gitea_host_certbot_cloudflare_api_token | length > 0)
+    fail_msg: "gitea_host_certbot_cloudflare_api_token must be defined when gitea_host_tls_enabled is true"

@@ -20,7 +20,7 @@ gitea_host_download_base_url: "https://dl.gitea.com/gitea"
 gitea_host_download_url: "{{ gitea_host_download_base_url }}/{{ gitea_host_version }}/gitea-{{ gitea_host_version }}-linux-{{ gitea_host_arch }}"
 
 # Network
-gitea_host_http_listen: "0.0.0.0"
+gitea_host_http_listen: "127.0.0.1"
 gitea_host_http_port: 3000
 gitea_host_ssh_listen: "0.0.0.0"
 gitea_host_ssh_port: 2222
@@ -45,8 +45,27 @@ gitea_host_service_name: gitea
 gitea_host_run_user: "{{ gitea_host_user }}"
 gitea_host_run_group: "{{ gitea_host_group }}"
 
+# Host-level reverse proxy / TLS
+gitea_host_nginx_enabled: true
+gitea_host_nginx_site_name: gitea
+gitea_host_nginx_access_log: "/var/log/nginx/gitea.access.log"
+gitea_host_nginx_error_log: "/var/log/nginx/gitea.error.log"
+gitea_host_nginx_client_max_body_size: "512M"
+
+# Certbot / Cloudflare DNS challenge
+gitea_host_tls_enabled: true
+gitea_host_tls_cert_dir: "/etc/letsencrypt/live/{{ gitea_host_domain }}"
+gitea_host_certbot_email: "admin@{{ gitea_host_domain | regex_replace('^[^.]+\\.', '') }}"
+gitea_host_certbot_cloudflare_credentials_path: /etc/letsencrypt/cloudflare.ini
+gitea_host_certbot_cloudflare_api_token: ""
+gitea_host_certbot_key_type: rsa
+gitea_host_certbot_dns_propagation_seconds: 30
+
 # Host prerequisites
 gitea_host_prerequisite_packages:
   - git
   - curl
   - wget
+  - nginx
+  - certbot
+  - python3-certbot-dns-cloudflare

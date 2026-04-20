@@ -44,6 +44,7 @@
         group: "{{ gitea_host_group }}",
       }
     - { path: "{{ gitea_host_log_dir }}", mode: "0755" }
+    - { path: "/etc/letsencrypt", mode: "0755", owner: "root", group: "root" }
   loop_control:
     loop_var: gitea_dir
 
@@ -81,3 +82,84 @@
     enabled: true
     state: started
     daemon_reload: true
+
+- name: Render Cloudflare credentials file for Certbot
+  ansible.builtin.template:
+    src: cloudflare.ini.j2
+    dest: "{{ gitea_host_certbot_cloudflare_credentials_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
+
+- name: Render Nginx site for Gitea
+  ansible.builtin.template:
+    src: nginx-gitea.conf.j2
+    dest: "/etc/nginx/sites-available/{{ gitea_host_nginx_site_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: gitea_host_nginx_enabled | bool
+  notify: Reload nginx
+
+- name: Enable Nginx site for Gitea
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ gitea_host_nginx_site_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ gitea_host_nginx_site_name }}"
+    state: link
+  when: gitea_host_nginx_enabled | bool
+  notify: Reload nginx
+
+- name: Disable default Nginx site if present
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  when: gitea_host_nginx_enabled | bool
+  notify: Reload nginx
+
+- name: Ensure Nginx service is enabled and started
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started
+  when: gitea_host_nginx_enabled | bool
+
+- name: Obtain or renew Gitea TLS certificate with Certbot Cloudflare DNS plugin
+  ansible.builtin.command:
+    cmd: >-
+      certbot certonly
+      --non-interactive
+      --agree-tos
+      --dns-cloudflare
+      --dns-cloudflare-credentials {{ gitea_host_certbot_cloudflare_credentials_path }}
+      --dns-cloudflare-propagation-seconds {{ gitea_host_certbot_dns_propagation_seconds }}
+      --email {{ gitea_host_certbot_email }}
+      --cert-name {{ gitea_host_domain }}
+      --domain {{ gitea_host_domain }}
+      --key-type {{ gitea_host_certbot_key_type }}
+      --keep-until-expiring
+      --deploy-hook "systemctl reload nginx"
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
+  register: gitea_host_certbot_result
+  changed_when: >
+    'Successfully received certificate' in (gitea_host_certbot_result.stdout | default('')) or
+    'Certificate not yet due for renewal' not in (gitea_host_certbot_result.stdout | default(''))
+
+- name: Validate Nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
+  when: gitea_host_nginx_enabled | bool
+
+- name: Ensure Certbot renewal timer is enabled and started
+  ansible.builtin.systemd:
+    name: certbot.timer
+    enabled: true
+    state: started
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool

@@ -5,7 +5,7 @@
 - name: Assert Gitea service exists
   ansible.builtin.assert:
     that:
-      - gitea_host_service_name ~ '.service' in ansible_facts.services
+      - "'{{ gitea_host_service_name }}.service' in ansible_facts.services"
     fail_msg: "Gitea systemd service was not found"
 
 - name: Assert Gitea service is running
@@ -14,8 +14,56 @@
       - ansible_facts.services[gitea_host_service_name ~ '.service'].state == 'running'
     fail_msg: "Gitea service is not running"
 
+- name: Assert Nginx service exists when enabled
+  ansible.builtin.assert:
+    that:
+      - not (gitea_host_nginx_enabled | bool) or ('nginx.service' in ansible_facts.services)
+    fail_msg: "Nginx systemd service was not found"
+  when: gitea_host_nginx_enabled | bool
+
+- name: Assert Nginx service is running when enabled
+  ansible.builtin.assert:
+    that:
+      - not (gitea_host_nginx_enabled | bool) or (ansible_facts.services['nginx.service'].state == 'running')
+    fail_msg: "Nginx service is not running"
+  when: gitea_host_nginx_enabled | bool
+
 - name: Wait for Gitea HTTP port
   ansible.builtin.wait_for:
     host: "127.0.0.1"
     port: "{{ gitea_host_http_port }}"
     timeout: 30
+
+- name: Wait for Nginx HTTPS port when TLS enabled
+  ansible.builtin.wait_for:
+    host: "127.0.0.1"
+    port: 443
+    timeout: 30
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
+
+- name: Check local HTTPS response for Gitea
+  ansible.builtin.command:
+    cmd: curl -kI https://{{ gitea_host_domain }}
+  changed_when: false
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
+
+- name: Assert Gitea certificate files exist when TLS enabled
+  ansible.builtin.stat:
+    path: "{{ gitea_host_tls_cert_dir }}/fullchain.pem"
+  register: gitea_host_tls_fullchain_stat
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
+
+- name: Assert Gitea fullchain certificate exists
+  ansible.builtin.assert:
+    that:
+      - gitea_host_tls_fullchain_stat.stat.exists
+    fail_msg: "Gitea TLS fullchain.pem was not found"
+  when:
+    - gitea_host_nginx_enabled | bool
+    - gitea_host_tls_enabled | bool
