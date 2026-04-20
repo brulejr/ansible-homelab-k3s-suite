@@ -1,22 +1,22 @@
 ---
-- name: Skip vaultwarden when disabled
-  ansible.builtin.meta: end_role
-  when: not vaultwarden_enabled | bool
-
 - name: Validate vaultwarden hostname when ingress is enabled
   ansible.builtin.assert:
     that:
       - not vaultwarden_ingress_enabled | bool or vaultwarden_hostname | length > 0
     fail_msg: "vaultwarden_hostname must be set when vaultwarden_ingress_enabled is true"
+  when: vaultwarden_enabled | bool
 
 - name: Validate vaultwarden admin token is set
   ansible.builtin.assert:
     that:
       - vaultwarden_admin_token | length > 0
     fail_msg: "vaultwarden_admin_token must be set"
+  when: vaultwarden_enabled | bool
 
 - name: Install vaultwarden
   ansible.builtin.include_tasks: install.yml
+  when: vaultwarden_enabled | bool
 
 - name: Verify vaultwarden
   ansible.builtin.include_tasks: verify.yml
+  when: vaultwarden_enabled | bool
