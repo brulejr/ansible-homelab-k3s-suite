@@ -155,6 +155,12 @@
   changed_when: false
   when: gitea_host_nginx_enabled | bool
 
+- name: Reload Nginx to apply current configuration
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  when: gitea_host_nginx_enabled | bool
+
 - name: Ensure Certbot renewal timer is enabled and started
   ansible.builtin.systemd:
     name: certbot.timer
