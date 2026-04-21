@@ -82,6 +82,19 @@
     cmd: udevadm trigger
   changed_when: false
 
+- name: Stop rtl_tcp before attempting module unload
+  ansible.builtin.systemd:
+    name: "{{ rtl_sdr_host_service_name }}"
+    state: stopped
+  failed_when: false
+
+- name: Unload conflicting RTL DVB kernel modules
+  ansible.builtin.command:
+    cmd: modprobe -r rtl2832_sdr dvb_usb_rtl28xxu rtl2832 dvb_usb_v2 rtl2830
+  register: rtl_sdr_host_modprobe_r
+  changed_when: rtl_sdr_host_modprobe_r.rc == 0
+  failed_when: false
+
 - name: Render rtl_tcp systemd service
   ansible.builtin.template:
     src: rtl_tcp.service.j2

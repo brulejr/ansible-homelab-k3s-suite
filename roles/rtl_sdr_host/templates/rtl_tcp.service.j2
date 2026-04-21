@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
+ExecStartPre=-/usr/sbin/modprobe -r rtl2832_sdr dvb_usb_rtl28xxu rtl2832 dvb_usb_v2 rtl2830
 ExecStart=/usr/local/bin/rtl_tcp -a {{ rtl_sdr_host_tcp_bind_address }} -p {{ rtl_sdr_host_tcp_port }} -d {{ rtl_sdr_host_device_index }} -P {{ rtl_sdr_host_tcp_ppm }} -g {{ rtl_sdr_host_tcp_gain }}
 Restart=always
 RestartSec=2

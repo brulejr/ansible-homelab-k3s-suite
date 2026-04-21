@@ -8,11 +8,23 @@
       - (rtl_sdr_host_service_name ~ '.service') in ansible_facts.services
     fail_msg: "rtl_tcp systemd service was not found"
 
-- name: Assert rtl_tcp service is running
-  ansible.builtin.assert:
-    that:
-      - ansible_facts.services[rtl_sdr_host_service_name ~ '.service'].state == 'running'
-    fail_msg: "rtl_tcp service is not running"
+- name: Capture rtl_tcp service status when not running
+  ansible.builtin.command:
+    cmd: systemctl status {{ rtl_sdr_host_service_name }} --no-pager -l
+  register: rtl_sdr_host_systemctl_status
+  changed_when: false
+  failed_when: false
+  when: ansible_facts.services[rtl_sdr_host_service_name ~ '.service'].state != 'running'
+
+- name: Fail when rtl_tcp service is not running
+  ansible.builtin.fail:
+    msg: |
+      rtl_tcp service is not running.
+
+      systemctl status output:
+      {{ rtl_sdr_host_systemctl_status.stdout | default('') }}
+      {{ rtl_sdr_host_systemctl_status.stderr | default('') }}
+  when: ansible_facts.services[rtl_sdr_host_service_name ~ '.service'].state != 'running'
 
 - name: Wait for rtl_tcp port
   ansible.builtin.wait_for:
@@ -31,3 +43,22 @@
     that:
       - "(':' ~ (rtl_sdr_host_tcp_port | string)) in rtl_sdr_host_ss.stdout"
     fail_msg: "rtl_tcp is not listening on the expected port"
+
+- name: Verify RTL-SDR device access
+  ansible.builtin.command:
+    cmd: /usr/local/bin/rtl_test -t
+  register: rtl_sdr_host_rtl_test
+  changed_when: false
+
+- name: Assert RTL-SDR test succeeded
+  ansible.builtin.assert:
+    that:
+      - rtl_sdr_host_rtl_test.rc == 0
+    fail_msg: |
+      rtl_test failed.
+
+      stdout:
+      {{ rtl_sdr_host_rtl_test.stdout | default('') }}
+
+      stderr:
+      {{ rtl_sdr_host_rtl_test.stderr | default('') }}
