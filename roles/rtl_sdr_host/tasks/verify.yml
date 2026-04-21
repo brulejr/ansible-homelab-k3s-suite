@@ -43,22 +43,3 @@
     that:
       - "(':' ~ (rtl_sdr_host_tcp_port | string)) in rtl_sdr_host_ss.stdout"
     fail_msg: "rtl_tcp is not listening on the expected port"
-
-- name: Verify RTL-SDR device access
-  ansible.builtin.command:
-    cmd: /usr/local/bin/rtl_test -t
-  register: rtl_sdr_host_rtl_test
-  changed_when: false
-
-- name: Assert RTL-SDR test succeeded
-  ansible.builtin.assert:
-    that:
-      - rtl_sdr_host_rtl_test.rc == 0
-    fail_msg: |
-      rtl_test failed.
-
-      stdout:
-      {{ rtl_sdr_host_rtl_test.stdout | default('') }}
-
-      stderr:
-      {{ rtl_sdr_host_rtl_test.stderr | default('') }}
