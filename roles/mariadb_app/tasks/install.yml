@@ -1,0 +1,67 @@
+---
+- name: Render MariaDB namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ mariadb_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MariaDB namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mariadb_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render MariaDB secret manifest
+  ansible.builtin.template:
+    src: secret.yaml.j2
+    dest: /tmp/{{ mariadb_app_name }}-secret.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply MariaDB secret manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mariadb_app_name }}-secret.yaml
+  changed_when: false
+
+- name: Render MariaDB PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ mariadb_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: mariadb_app_persistence_enabled | bool
+
+- name: Apply MariaDB PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mariadb_app_name }}-pvc.yaml
+  changed_when: false
+  when: mariadb_app_persistence_enabled | bool
+
+- name: Render MariaDB deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ mariadb_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MariaDB deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mariadb_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render MariaDB service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ mariadb_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply MariaDB service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ mariadb_app_name }}-service.yaml
+  changed_when: false

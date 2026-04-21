@@ -1,0 +1,29 @@
+---
+wavelog_enabled: true
+
+wavelog_namespace: apps
+wavelog_app_name: wavelog
+wavelog_hostname: wavelog.lab.example.com
+
+wavelog_image: ghcr.io/wavelog/wavelog:latest
+wavelog_replicas: 1
+wavelog_container_port: 80
+wavelog_service_port: 80
+
+wavelog_ingress_enabled: true
+wavelog_ingress_middlewares: []
+wavelog_tls_enabled: true
+wavelog_tls_cert_resolver: le
+
+wavelog_persistence_enabled: true
+wavelog_storage_class: longhorn
+wavelog_storage_size: 5Gi
+wavelog_data_mount_path: /var/www/html
+
+wavelog_db_host: mariadb-wavelog
+wavelog_db_name: wavelog
+wavelog_db_user: wavelog
+wavelog_db_password: ""
+
+wavelog_timezone: America/New_York
+wavelog_extra_env: {}

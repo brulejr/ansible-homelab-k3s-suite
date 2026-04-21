@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ mariadb_app_name }}
+  namespace: {{ mariadb_app_namespace }}
+spec:
+  replicas: {{ mariadb_app_replicas }}
+  selector:
+    matchLabels:
+      app: {{ mariadb_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ mariadb_app_name }}
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: {{ mariadb_app_name }}
+          image: {{ mariadb_app_image }}
+          ports:
+            - containerPort: {{ mariadb_app_container_port }}
+          envFrom:
+            - secretRef:
+                name: {{ mariadb_app_name }}
+          env:
+            - name: MARIADB_CHARACTER_SET_SERVER
+              value: {{ mariadb_app_charset | quote }}
+            - name: MARIADB_COLLATION_SERVER
+              value: {{ mariadb_app_collation | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ mariadb_app_data_mount_path | quote }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ mariadb_app_name }}

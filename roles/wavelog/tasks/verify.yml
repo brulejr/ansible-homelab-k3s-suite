@@ -1,0 +1,18 @@
+---
+- name: Wait for Wavelog deployment rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ wavelog_namespace }} rollout status deploy/{{ wavelog_app_name }} --timeout=180s
+  changed_when: false
+
+- name: Get Wavelog objects
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ wavelog_namespace }} get deploy,pods,svc,pvc
+  register: wavelog_objects
+  changed_when: false
+
+- name: Get Wavelog ingressroute
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ wavelog_namespace }} get ingressroute {{ wavelog_app_name }} -o yaml
+  register: wavelog_ingress
+  changed_when: false
+  when: wavelog_ingress_enabled | bool

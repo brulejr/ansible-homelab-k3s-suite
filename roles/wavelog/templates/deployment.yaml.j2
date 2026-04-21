@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ wavelog_app_name }}
+  namespace: {{ wavelog_namespace }}
+spec:
+  replicas: {{ wavelog_replicas }}
+  selector:
+    matchLabels:
+      app: {{ wavelog_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ wavelog_app_name }}
+    spec:
+      securityContext:
+        fsGroup: 33
+      containers:
+        - name: {{ wavelog_app_name }}
+          image: {{ wavelog_image }}
+          ports:
+            - containerPort: {{ wavelog_container_port }}
+          envFrom:
+            - secretRef:
+                name: {{ wavelog_app_name }}
+          env:
+            - name: TZ
+              value: {{ wavelog_timezone | quote }}
+{% for env_name, env_value in wavelog_extra_env.items() %}
+            - name: {{ env_name }}
+              value: {{ env_value | quote }}
+{% endfor %}
+          volumeMounts:
+            - name: data
+              mountPath: {{ wavelog_data_mount_path | quote }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ wavelog_app_name }}

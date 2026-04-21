@@ -1,0 +1,11 @@
+---
+- name: Wait for MariaDB deployment rollout
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ mariadb_app_namespace }} rollout status deploy/{{ mariadb_app_name }} --timeout=180s
+  changed_when: false
+
+- name: Get MariaDB objects
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ mariadb_app_namespace }} get deploy,pods,svc,pvc
+  register: mariadb_app_objects
+  changed_when: false

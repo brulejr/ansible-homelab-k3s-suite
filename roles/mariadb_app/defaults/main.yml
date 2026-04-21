@@ -1,0 +1,23 @@
+---
+mariadb_app_enabled: true
+
+mariadb_app_namespace: apps
+mariadb_app_name: mariadb-wavelog
+
+mariadb_app_image: mariadb:11.4
+mariadb_app_replicas: 1
+mariadb_app_container_port: 3306
+mariadb_app_service_port: 3306
+
+mariadb_app_storage_class: longhorn
+mariadb_app_storage_size: 10Gi
+mariadb_app_persistence_enabled: true
+mariadb_app_data_mount_path: /var/lib/mysql
+
+mariadb_app_database_name: wavelog
+mariadb_app_database_user: wavelog
+mariadb_app_database_password: ""
+mariadb_app_root_password: ""
+
+mariadb_app_charset: utf8mb4
+mariadb_app_collation: utf8mb4_unicode_ci

@@ -1,0 +1,24 @@
+---
+- name: Assert Wavelog namespace is defined
+  ansible.builtin.assert:
+    that:
+      - wavelog_namespace | length > 0
+    fail_msg: "wavelog_namespace must be defined"
+
+- name: Assert Wavelog hostname is defined when ingress enabled
+  ansible.builtin.assert:
+    that:
+      - not wavelog_ingress_enabled or (wavelog_hostname | length > 0)
+    fail_msg: "wavelog_hostname must be defined when wavelog_ingress_enabled is true"
+
+- name: Assert Wavelog DB password is defined
+  ansible.builtin.assert:
+    that:
+      - wavelog_db_password | length > 0
+    fail_msg: "wavelog_db_password must be defined"
+
+- name: Assert Wavelog storage class is set when persistence enabled
+  ansible.builtin.assert:
+    that:
+      - not wavelog_persistence_enabled or (wavelog_storage_class | length > 0)
+    fail_msg: "wavelog_storage_class must be defined when wavelog_persistence_enabled is true"

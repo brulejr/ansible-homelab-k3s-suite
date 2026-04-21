@@ -1,0 +1,82 @@
+---
+- name: Render Wavelog namespace manifest
+  ansible.builtin.template:
+    src: namespace.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-namespace.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Wavelog namespace manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-namespace.yaml
+  changed_when: false
+
+- name: Render Wavelog secret manifest
+  ansible.builtin.template:
+    src: secret.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-secret.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Apply Wavelog secret manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-secret.yaml
+  changed_when: false
+
+- name: Render Wavelog PVC manifest
+  ansible.builtin.template:
+    src: pvc.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-pvc.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: wavelog_persistence_enabled | bool
+
+- name: Apply Wavelog PVC manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-pvc.yaml
+  changed_when: false
+  when: wavelog_persistence_enabled | bool
+
+- name: Render Wavelog deployment manifest
+  ansible.builtin.template:
+    src: deployment.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-deployment.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Wavelog deployment manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-deployment.yaml
+  changed_when: false
+
+- name: Render Wavelog service manifest
+  ansible.builtin.template:
+    src: service.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-service.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Apply Wavelog service manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-service.yaml
+  changed_when: false
+
+- name: Render Wavelog ingressroute manifest
+  ansible.builtin.template:
+    src: ingressroute.yaml.j2
+    dest: /tmp/{{ wavelog_app_name }}-ingressroute.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  when: wavelog_ingress_enabled | bool
+
+- name: Apply Wavelog ingressroute manifest
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ wavelog_app_name }}-ingressroute.yaml
+  changed_when: false
+  when: wavelog_ingress_enabled | bool

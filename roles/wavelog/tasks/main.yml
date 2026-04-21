@@ -1,0 +1,12 @@
+---
+- name: Validate wavelog configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: wavelog_enabled | bool
+
+- name: Install and configure wavelog
+  ansible.builtin.include_tasks: install.yml
+  when: wavelog_enabled | bool
+
+- name: Verify wavelog
+  ansible.builtin.include_tasks: verify.yml
+  when: wavelog_enabled | bool

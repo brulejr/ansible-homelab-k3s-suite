@@ -1,0 +1,12 @@
+---
+- name: Validate mariadb_app configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: mariadb_app_enabled | bool
+
+- name: Install and configure mariadb_app
+  ansible.builtin.include_tasks: install.yml
+  when: mariadb_app_enabled | bool
+
+- name: Verify mariadb_app
+  ansible.builtin.include_tasks: verify.yml
+  when: mariadb_app_enabled | bool
