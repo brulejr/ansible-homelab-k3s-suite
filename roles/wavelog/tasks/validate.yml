@@ -22,3 +22,11 @@
     that:
       - not wavelog_persistence_enabled or (wavelog_storage_class | length > 0)
     fail_msg: "wavelog_storage_class must be defined when wavelog_persistence_enabled is true"
+
+- name: Assert Wavelog mount paths are defined when persistence enabled
+  ansible.builtin.assert:
+    that:
+      - not wavelog_persistence_enabled or (wavelog_config_mount_path | length > 0)
+      - not wavelog_persistence_enabled or (wavelog_uploads_mount_path | length > 0)
+      - not wavelog_persistence_enabled or (wavelog_userdata_mount_path | length > 0)
+    fail_msg: "Wavelog mount paths must be defined when persistence is enabled"

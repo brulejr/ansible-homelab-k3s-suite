@@ -15,6 +15,27 @@ spec:
     spec:
       securityContext:
         fsGroup: 33
+      initContainers:
+{% if wavelog_persistence_enabled %}
+        - name: init-wavelog-storage
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /mnt/config /mnt/uploads /mnt/userdata
+              chown -R 33:33 /mnt/config /mnt/uploads /mnt/userdata
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/config
+              subPath: config
+            - name: data
+              mountPath: /mnt/uploads
+              subPath: uploads
+            - name: data
+              mountPath: /mnt/userdata
+              subPath: userdata
+{% endif %}
       containers:
         - name: {{ wavelog_app_name }}
           image: {{ wavelog_image }}
@@ -31,9 +52,20 @@ spec:
               value: {{ env_value | quote }}
 {% endfor %}
           volumeMounts:
+{% if wavelog_persistence_enabled %}
             - name: data
-              mountPath: {{ wavelog_data_mount_path | quote }}
+              mountPath: {{ wavelog_config_mount_path | quote }}
+              subPath: config
+            - name: data
+              mountPath: {{ wavelog_uploads_mount_path | quote }}
+              subPath: uploads
+            - name: data
+              mountPath: {{ wavelog_userdata_mount_path | quote }}
+              subPath: userdata
+{% endif %}
       volumes:
+{% if wavelog_persistence_enabled %}
         - name: data
           persistentVolumeClaim:
             claimName: {{ wavelog_app_name }}
+{% endif %}

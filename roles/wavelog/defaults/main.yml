@@ -18,7 +18,10 @@ wavelog_tls_cert_resolver: le
 wavelog_persistence_enabled: true
 wavelog_storage_class: longhorn
 wavelog_storage_size: 5Gi
-wavelog_data_mount_path: /var/www/html
+
+wavelog_config_mount_path: /var/www/html/application/config/docker
+wavelog_uploads_mount_path: /var/www/html/uploads
+wavelog_userdata_mount_path: /var/www/html/userdata
 
 wavelog_db_host: mariadb-wavelog
 wavelog_db_name: wavelog
