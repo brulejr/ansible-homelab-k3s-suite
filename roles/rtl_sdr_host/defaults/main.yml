@@ -5,7 +5,7 @@ rtl_sdr_host_enabled: true
 rtl_sdr_host_driver_flavor: blog
 rtl_sdr_host_repo_url_blog: https://github.com/rtlsdrblog/rtl-sdr-blog.git
 rtl_sdr_host_repo_url_osmocom: https://git.osmocom.org/rtl-sdr
-rtl_sdr_host_repo_version: main
+rtl_sdr_host_repo_version: master
 rtl_sdr_host_src_dir: /usr/local/src/rtl-sdr
 rtl_sdr_host_build_dir: /usr/local/src/rtl-sdr/build
 
