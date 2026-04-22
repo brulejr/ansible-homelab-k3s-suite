@@ -43,14 +43,15 @@
     jekyll_gitea_seed_bootstrap_create.rc != 0 and
     'already exists' not in ((jekyll_gitea_seed_bootstrap_create.stderr | default('')) ~ ' ' ~ (jekyll_gitea_seed_bootstrap_create.stdout | default('')))
 
-- name: Ensure bootstrap admin password is set in local Gitea
+- name: Ensure bootstrap admin password and must-change-password flag are set in local Gitea
   ansible.builtin.shell: >-
     su -s /bin/sh -c
     '{{ jekyll_gitea_seed_gitea_binary_path }}
     --config {{ jekyll_gitea_seed_gitea_config_path }}
     admin user change-password
     --username {{ jekyll_gitea_seed_bootstrap_admin_username | quote }}
-    --password {{ jekyll_gitea_seed_bootstrap_admin_password | quote }}'
+    --password {{ jekyll_gitea_seed_bootstrap_admin_password | quote }}
+    --must-change-password={{ "true" if jekyll_gitea_seed_bootstrap_admin_must_change_password | bool else "false" }}'
     {{ jekyll_gitea_seed_gitea_run_user }}
   args:
     executable: /bin/bash
@@ -76,14 +77,15 @@
     jekyll_gitea_seed_owner_create.rc != 0 and
     'already exists' not in ((jekyll_gitea_seed_owner_create.stderr | default('')) ~ ' ' ~ (jekyll_gitea_seed_owner_create.stdout | default('')))
 
-- name: Ensure managed Jekyll user password is set in local Gitea
+- name: Ensure managed Jekyll user password and must-change-password flag are set in local Gitea
   ansible.builtin.shell: >-
     su -s /bin/sh -c
     '{{ jekyll_gitea_seed_gitea_binary_path }}
     --config {{ jekyll_gitea_seed_gitea_config_path }}
     admin user change-password
     --username {{ jekyll_gitea_seed_owner | quote }}
-    --password {{ jekyll_gitea_seed_owner_password | quote }}'
+    --password {{ jekyll_gitea_seed_owner_password | quote }}
+    --must-change-password={{ "true" if jekyll_gitea_seed_owner_must_change_password | bool else "false" }}'
     {{ jekyll_gitea_seed_gitea_run_user }}
   args:
     executable: /bin/bash
