@@ -1,0 +1,138 @@
+---
+- name: Ensure Jekyll seed work directory exists
+  ansible.builtin.file:
+    path: "{{ jekyll_gitea_seed_work_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Jekyll deploy key directory exists
+  ansible.builtin.file:
+    path: "{{ jekyll_gitea_seed_key_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Generate Jekyll deploy keypair
+  ansible.builtin.openssh_keypair:
+    path: "{{ jekyll_gitea_seed_private_key_path }}"
+    type: ed25519
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Check whether Jekyll repo exists in Gitea
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}"
+    method: GET
+    user: "{{ gitea_host_admin_username }}"
+    password: "{{ gitea_host_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: [200, 404]
+  register: jekyll_gitea_seed_repo_get
+
+- name: Create Jekyll repo in Gitea when absent
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/user/repos"
+    method: POST
+    user: "{{ gitea_host_admin_username }}"
+    password: "{{ gitea_host_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      name: "{{ jekyll_gitea_seed_repo_name }}"
+      description: "{{ jekyll_gitea_seed_repo_description }}"
+      private: "{{ jekyll_gitea_seed_repo_private }}"
+      auto_init: false
+      default_branch: "{{ jekyll_gitea_seed_branch }}"
+    status_code: 201
+  when: jekyll_gitea_seed_repo_get.status == 404
+
+- name: Read generated Jekyll public key
+  ansible.builtin.slurp:
+    src: "{{ jekyll_gitea_seed_public_key_path }}"
+  register: jekyll_gitea_seed_pubkey
+
+- name: Get existing repo deploy keys
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}/keys"
+    method: GET
+    user: "{{ gitea_host_admin_username }}"
+    password: "{{ gitea_host_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: jekyll_gitea_seed_existing_keys
+
+- name: Add Jekyll deploy key to repo when absent
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}/keys"
+    method: POST
+    user: "{{ gitea_host_admin_username }}"
+    password: "{{ gitea_host_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      title: "{{ jekyll_gitea_seed_deploy_key_title }}"
+      key: "{{ jekyll_gitea_seed_pubkey.content | b64decode | trim }}"
+      read_only: true
+    status_code: 201
+  when: >
+    (jekyll_gitea_seed_existing_keys.json | selectattr('title', 'equalto', jekyll_gitea_seed_deploy_key_title) | list | length) == 0
+
+- name: Check whether Gitea repo has commits
+  ansible.builtin.command:
+    cmd: git ls-remote --heads "{{ jekyll_gitea_seed_api_base }}/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git"
+  register: jekyll_gitea_seed_ls_remote
+  changed_when: false
+  failed_when: false
+
+- name: Remove previous working copy if present
+  ansible.builtin.file:
+    path: "{{ jekyll_gitea_seed_work_dir }}/repo"
+    state: absent
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Clone external Jekyll template when target repo is empty
+  ansible.builtin.git:
+    repo: "{{ jekyll_gitea_seed_template_repo }}"
+    version: "{{ jekyll_gitea_seed_template_ref }}"
+    dest: "{{ jekyll_gitea_seed_work_dir }}/repo"
+    force: true
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Set bootstrap git identity
+  ansible.builtin.command:
+    cmd: "{{ item.cmd }}"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  loop:
+    - { cmd: "git config user.name '{{ gitea_host_admin_username }}'" }
+    - { cmd: "git config user.email '{{ gitea_host_admin_email }}'" }
+  changed_when: false
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Set Gitea remote URL with embedded bootstrap credentials
+  ansible.builtin.command:
+    cmd: >-
+      git remote set-url origin
+      https://{{ gitea_host_admin_username | urlencode }}:{{ gitea_host_admin_password | urlencode }}@{{ gitea_host_domain }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Ensure template repo default branch is the requested branch
+  ansible.builtin.command:
+    cmd: git checkout -B "{{ jekyll_gitea_seed_branch }}"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  changed_when: false
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Push initial Jekyll template into Gitea when repo is empty
+  ansible.builtin.command:
+    cmd: git push origin "{{ jekyll_gitea_seed_branch }}" --force
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""

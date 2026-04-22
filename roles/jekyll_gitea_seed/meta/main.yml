@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Jon Brule
+  description: Seed a Jekyll source repository into host-level Gitea
+  license: MIT
+  min_ansible_version: "2.16"
+dependencies: []

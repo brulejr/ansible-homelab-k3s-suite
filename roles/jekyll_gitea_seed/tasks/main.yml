@@ -1,0 +1,12 @@
+---
+- name: Validate jekyll_gitea_seed configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: jekyll_gitea_seed_enabled | bool
+
+- name: Install and configure jekyll_gitea_seed
+  ansible.builtin.include_tasks: install.yml
+  when: jekyll_gitea_seed_enabled | bool
+
+- name: Verify jekyll_gitea_seed
+  ansible.builtin.include_tasks: verify.yml
+  when: jekyll_gitea_seed_enabled | bool

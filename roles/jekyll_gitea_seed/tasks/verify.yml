@@ -1,0 +1,28 @@
+---
+- name: Verify Jekyll repo exists in Gitea
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}"
+    method: GET
+    user: "{{ gitea_host_admin_username }}"
+    password: "{{ gitea_host_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: jekyll_gitea_seed_verify_repo
+
+- name: Assert Jekyll repo clone URL is returned
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_verify_repo.json.clone_url is defined
+    fail_msg: "Jekyll repo exists but clone_url was not returned"
+
+- name: Verify Jekyll deploy key private key exists on host
+  ansible.builtin.stat:
+    path: "{{ jekyll_gitea_seed_private_key_path }}"
+  register: jekyll_gitea_seed_key_stat
+
+- name: Assert Jekyll deploy key exists
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_key_stat.stat.exists
+    fail_msg: "Jekyll deploy key was not created"

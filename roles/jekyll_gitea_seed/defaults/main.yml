@@ -1,0 +1,22 @@
+---
+jekyll_gitea_seed_enabled: true
+
+jekyll_gitea_seed_owner: ""
+jekyll_gitea_seed_repo_name: brulenet-doco
+jekyll_gitea_seed_repo_description: "Jekyll documentation site"
+jekyll_gitea_seed_repo_private: false
+
+jekyll_gitea_seed_template_repo: ""
+jekyll_gitea_seed_template_ref: main
+jekyll_gitea_seed_branch: main
+
+jekyll_gitea_seed_work_dir: /var/tmp/jekyll-gitea-seed
+jekyll_gitea_seed_key_dir: /etc/jekyll-git
+jekyll_gitea_seed_private_key_path: "{{ jekyll_gitea_seed_key_dir }}/id_ed25519"
+jekyll_gitea_seed_public_key_path: "{{ jekyll_gitea_seed_private_key_path }}.pub"
+jekyll_gitea_seed_deploy_key_title: jekyll-cluster-readonly
+
+jekyll_gitea_seed_known_host: "{{ gitea_host_domain }}"
+jekyll_gitea_seed_known_host_port: "{{ gitea_host_ssh_port }}"
+
+jekyll_gitea_seed_api_base: "{{ gitea_host_root_url | regex_replace('/+$', '') }}"

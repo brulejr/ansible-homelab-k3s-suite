@@ -1,0 +1,24 @@
+---
+- name: Assert Jekyll Gitea seed owner is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_owner | length > 0
+    fail_msg: "jekyll_gitea_seed_owner must be defined"
+
+- name: Assert Jekyll repo name is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_repo_name | length > 0
+    fail_msg: "jekyll_gitea_seed_repo_name must be defined"
+
+- name: Assert Jekyll template repo is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_template_repo | length > 0
+    fail_msg: "jekyll_gitea_seed_template_repo must be defined"
+
+- name: Assert Jekyll API base is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_api_base | length > 0
+    fail_msg: "jekyll_gitea_seed_api_base must be defined"
