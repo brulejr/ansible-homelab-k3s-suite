@@ -24,18 +24,19 @@
     mode: "0600"
 
 - name: Ensure bootstrap admin user exists in local Gitea
-  ansible.builtin.command:
-    cmd: >-
-      {{ jekyll_gitea_seed_gitea_binary_path }}
-      --config {{ jekyll_gitea_seed_gitea_config_path }}
-      admin user create
-      --username {{ jekyll_gitea_seed_bootstrap_admin_username }}
-      --password {{ jekyll_gitea_seed_bootstrap_admin_password }}
-      --email {{ jekyll_gitea_seed_bootstrap_admin_email }}
-      --admin
-      --must-change-password={{ 'true' if jekyll_gitea_seed_bootstrap_admin_must_change_password | bool else 'false' }}
-  become: true
-  become_user: "{{ jekyll_gitea_seed_gitea_run_user }}"
+  ansible.builtin.shell: >-
+    su -s /bin/sh -c
+    '{{ jekyll_gitea_seed_gitea_binary_path }}
+    --config {{ jekyll_gitea_seed_gitea_config_path }}
+    admin user create
+    --username {{ jekyll_gitea_seed_bootstrap_admin_username | quote }}
+    --password {{ jekyll_gitea_seed_bootstrap_admin_password | quote }}
+    --email {{ jekyll_gitea_seed_bootstrap_admin_email | quote }}
+    --admin
+    --must-change-password={{ "true" if jekyll_gitea_seed_bootstrap_admin_must_change_password | bool else "false" }}'
+    {{ jekyll_gitea_seed_gitea_run_user }}
+  args:
+    executable: /bin/bash
   register: jekyll_gitea_seed_bootstrap_create
   changed_when: jekyll_gitea_seed_bootstrap_create.rc == 0
   failed_when: >
@@ -43,31 +44,32 @@
     'already exists' not in ((jekyll_gitea_seed_bootstrap_create.stderr | default('')) ~ ' ' ~ (jekyll_gitea_seed_bootstrap_create.stdout | default('')))
 
 - name: Ensure bootstrap admin password is set in local Gitea
-  ansible.builtin.command:
-    cmd: >-
-      {{ jekyll_gitea_seed_gitea_binary_path }}
-      --config {{ jekyll_gitea_seed_gitea_config_path }}
-      admin user change-password
-      --username {{ jekyll_gitea_seed_bootstrap_admin_username }}
-      --password {{ jekyll_gitea_seed_bootstrap_admin_password }}
-      --must-change-password={{ 'true' if jekyll_gitea_seed_bootstrap_admin_must_change_password | bool else 'false' }}
-  become: true
-  become_user: "{{ jekyll_gitea_seed_gitea_run_user }}"
+  ansible.builtin.shell: >-
+    su -s /bin/sh -c
+    '{{ jekyll_gitea_seed_gitea_binary_path }}
+    --config {{ jekyll_gitea_seed_gitea_config_path }}
+    admin user change-password
+    --username {{ jekyll_gitea_seed_bootstrap_admin_username | quote }}
+    --password {{ jekyll_gitea_seed_bootstrap_admin_password | quote }}'
+    {{ jekyll_gitea_seed_gitea_run_user }}
+  args:
+    executable: /bin/bash
   changed_when: false
 
 - name: Ensure managed Jekyll user exists in local Gitea
-  ansible.builtin.command:
-    cmd: >-
-      {{ jekyll_gitea_seed_gitea_binary_path }}
-      --config {{ jekyll_gitea_seed_gitea_config_path }}
-      admin user create
-      --username {{ jekyll_gitea_seed_owner }}
-      --password {{ jekyll_gitea_seed_owner_password }}
-      --email {{ jekyll_gitea_seed_owner_email }}
-      {% if jekyll_gitea_seed_owner_admin | bool %}--admin{% endif %}
-      --must-change-password={{ 'true' if jekyll_gitea_seed_owner_must_change_password | bool else 'false' }}
-  become: true
-  become_user: "{{ jekyll_gitea_seed_gitea_run_user }}"
+  ansible.builtin.shell: >-
+    su -s /bin/sh -c
+    '{{ jekyll_gitea_seed_gitea_binary_path }}
+    --config {{ jekyll_gitea_seed_gitea_config_path }}
+    admin user create
+    --username {{ jekyll_gitea_seed_owner | quote }}
+    --password {{ jekyll_gitea_seed_owner_password | quote }}
+    --email {{ jekyll_gitea_seed_owner_email | quote }}
+    {% if jekyll_gitea_seed_owner_admin | bool %}--admin{% endif %}
+    --must-change-password={{ "true" if jekyll_gitea_seed_owner_must_change_password | bool else "false" }}'
+    {{ jekyll_gitea_seed_gitea_run_user }}
+  args:
+    executable: /bin/bash
   register: jekyll_gitea_seed_owner_create
   changed_when: jekyll_gitea_seed_owner_create.rc == 0
   failed_when: >
@@ -75,16 +77,16 @@
     'already exists' not in ((jekyll_gitea_seed_owner_create.stderr | default('')) ~ ' ' ~ (jekyll_gitea_seed_owner_create.stdout | default('')))
 
 - name: Ensure managed Jekyll user password is set in local Gitea
-  ansible.builtin.command:
-    cmd: >-
-      {{ jekyll_gitea_seed_gitea_binary_path }}
-      --config {{ jekyll_gitea_seed_gitea_config_path }}
-      admin user change-password
-      --username {{ jekyll_gitea_seed_owner }}
-      --password {{ jekyll_gitea_seed_owner_password }}
-      --must-change-password={{ 'true' if jekyll_gitea_seed_owner_must_change_password | bool else 'false' }}
-  become: true
-  become_user: "{{ jekyll_gitea_seed_gitea_run_user }}"
+  ansible.builtin.shell: >-
+    su -s /bin/sh -c
+    '{{ jekyll_gitea_seed_gitea_binary_path }}
+    --config {{ jekyll_gitea_seed_gitea_config_path }}
+    admin user change-password
+    --username {{ jekyll_gitea_seed_owner | quote }}
+    --password {{ jekyll_gitea_seed_owner_password | quote }}'
+    {{ jekyll_gitea_seed_gitea_run_user }}
+  args:
+    executable: /bin/bash
   changed_when: false
 
 - name: Check whether Jekyll repo exists in Gitea
@@ -184,7 +186,7 @@
   ansible.builtin.command:
     cmd: >-
       git remote set-url origin
-      https://{{ jekyll_gitea_seed_owner | urlencode }}:{{ jekyll_gitea_seed_owner_password | urlencode }}@{{ gitea_host_domain }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
+      https://{{ jekyll_gitea_seed_owner | urlencode }}:{{ jekyll_gitea_seed_owner_password | urlencode }}@{{ jekyll_gitea_seed_known_host }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
