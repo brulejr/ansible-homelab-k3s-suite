@@ -1,9 +1,33 @@
 ---
-- name: Assert Jekyll Gitea seed owner is defined
+- name: Assert Jekyll bootstrap admin username is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_bootstrap_admin_username | length > 0
+    fail_msg: "jekyll_gitea_seed_bootstrap_admin_username must be defined"
+
+- name: Assert Jekyll bootstrap admin password is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_bootstrap_admin_password | length > 0
+    fail_msg: "jekyll_gitea_seed_bootstrap_admin_password must be defined"
+
+- name: Assert Jekyll owner username is defined
   ansible.builtin.assert:
     that:
       - jekyll_gitea_seed_owner | length > 0
     fail_msg: "jekyll_gitea_seed_owner must be defined"
+
+- name: Assert Jekyll owner email is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_owner_email | length > 0
+    fail_msg: "jekyll_gitea_seed_owner_email must be defined"
+
+- name: Assert Jekyll owner password is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_owner_password | length > 0
+    fail_msg: "jekyll_gitea_seed_owner_password must be defined"
 
 - name: Assert Jekyll repo name is defined
   ansible.builtin.assert:

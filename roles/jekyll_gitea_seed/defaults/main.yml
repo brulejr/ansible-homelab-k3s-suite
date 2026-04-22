@@ -1,7 +1,17 @@
 ---
 jekyll_gitea_seed_enabled: true
 
-jekyll_gitea_seed_owner: ""
+# Existing real Gitea admin used for bootstrap API calls
+jekyll_gitea_seed_bootstrap_admin_username: ""
+jekyll_gitea_seed_bootstrap_admin_password: ""
+
+# Managed Jekyll service user that this role ensures exists
+jekyll_gitea_seed_owner: jekyll
+jekyll_gitea_seed_owner_email: jekyll@brulenet.dev
+jekyll_gitea_seed_owner_password: ""
+jekyll_gitea_seed_owner_admin: false
+jekyll_gitea_seed_owner_must_change_password: false
+
 jekyll_gitea_seed_repo_name: brulenet-doco
 jekyll_gitea_seed_repo_description: "Jekyll documentation site"
 jekyll_gitea_seed_repo_private: false

@@ -23,23 +23,68 @@
     group: root
     mode: "0600"
 
+- name: Check whether managed Jekyll Gitea user exists
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/users/{{ jekyll_gitea_seed_owner }}"
+    method: GET
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: [200, 404]
+  register: jekyll_gitea_seed_user_get
+
+- name: Create managed Jekyll Gitea user when absent
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/admin/users"
+    method: POST
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      username: "{{ jekyll_gitea_seed_owner }}"
+      email: "{{ jekyll_gitea_seed_owner_email }}"
+      password: "{{ jekyll_gitea_seed_owner_password }}"
+      must_change_password: "{{ jekyll_gitea_seed_owner_must_change_password }}"
+      send_notify: false
+      visibility: public
+      restricted: false
+      active: true
+      admin: "{{ jekyll_gitea_seed_owner_admin }}"
+      prohibit_login: false
+    status_code: 201
+  when: jekyll_gitea_seed_user_get.status == 404
+
+- name: Re-check managed Jekyll Gitea user
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/users/{{ jekyll_gitea_seed_owner }}"
+    method: GET
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: jekyll_gitea_seed_user_verify
+
 - name: Check whether Jekyll repo exists in Gitea
   ansible.builtin.uri:
     url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}"
     method: GET
-    user: "{{ gitea_host_admin_username }}"
-    password: "{{ gitea_host_admin_password }}"
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
     force_basic_auth: true
     validate_certs: false
     status_code: [200, 404]
   register: jekyll_gitea_seed_repo_get
 
-- name: Create Jekyll repo in Gitea when absent
+- name: Create Jekyll repo in Gitea for managed user when absent
   ansible.builtin.uri:
-    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/user/repos"
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/admin/users/{{ jekyll_gitea_seed_owner }}/repos"
     method: POST
-    user: "{{ gitea_host_admin_username }}"
-    password: "{{ gitea_host_admin_password }}"
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
     force_basic_auth: true
     validate_certs: false
     body_format: json
@@ -61,8 +106,8 @@
   ansible.builtin.uri:
     url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}/keys"
     method: GET
-    user: "{{ gitea_host_admin_username }}"
-    password: "{{ gitea_host_admin_password }}"
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
     force_basic_auth: true
     validate_certs: false
     status_code: 200
@@ -72,8 +117,8 @@
   ansible.builtin.uri:
     url: "{{ jekyll_gitea_seed_api_base }}/api/v1/repos/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}/keys"
     method: POST
-    user: "{{ gitea_host_admin_username }}"
-    password: "{{ gitea_host_admin_password }}"
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
     force_basic_auth: true
     validate_certs: false
     body_format: json
@@ -111,16 +156,16 @@
     cmd: "{{ item.cmd }}"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   loop:
-    - { cmd: "git config user.name '{{ gitea_host_admin_username }}'" }
-    - { cmd: "git config user.email '{{ gitea_host_admin_email }}'" }
+    - { cmd: "git config user.name '{{ jekyll_gitea_seed_owner }}'" }
+    - { cmd: "git config user.email '{{ jekyll_gitea_seed_owner_email }}'" }
   changed_when: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Set Gitea remote URL with embedded bootstrap credentials
+- name: Set Gitea remote URL with managed user credentials
   ansible.builtin.command:
     cmd: >-
       git remote set-url origin
-      https://{{ gitea_host_admin_username | urlencode }}:{{ gitea_host_admin_password | urlencode }}@{{ gitea_host_domain }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
+      https://{{ jekyll_gitea_seed_owner | urlencode }}:{{ jekyll_gitea_seed_owner_password | urlencode }}@{{ gitea_host_domain }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
