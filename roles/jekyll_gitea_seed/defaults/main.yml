@@ -1,11 +1,13 @@
 ---
 jekyll_gitea_seed_enabled: true
 
-# Existing real Gitea admin used for bootstrap API calls
-jekyll_gitea_seed_bootstrap_admin_username: ""
+# Real bootstrap admin user that this role will ensure exists locally in Gitea
+jekyll_gitea_seed_bootstrap_admin_username: gitea-bootstrap
+jekyll_gitea_seed_bootstrap_admin_email: gitea-bootstrap@brulenet.dev
 jekyll_gitea_seed_bootstrap_admin_password: ""
+jekyll_gitea_seed_bootstrap_admin_must_change_password: false
 
-# Managed Jekyll service user that this role ensures exists
+# Managed Jekyll service user that this role will ensure exists
 jekyll_gitea_seed_owner: jekyll
 jekyll_gitea_seed_owner_email: jekyll@brulenet.dev
 jekyll_gitea_seed_owner_password: ""
@@ -30,3 +32,8 @@ jekyll_gitea_seed_known_host: "{{ gitea_host_domain }}"
 jekyll_gitea_seed_known_host_port: "{{ gitea_host_ssh_port }}"
 
 jekyll_gitea_seed_api_base: "{{ gitea_host_root_url | regex_replace('/+$', '') }}"
+
+# Local Gitea CLI execution
+jekyll_gitea_seed_gitea_binary_path: "{{ gitea_host_binary_path }}"
+jekyll_gitea_seed_gitea_config_path: "{{ gitea_host_config_dir }}/app.ini"
+jekyll_gitea_seed_gitea_run_user: "{{ gitea_host_run_user }}"

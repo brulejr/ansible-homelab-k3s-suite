@@ -1,5 +1,16 @@
 ---
-- name: Verify managed Jekyll Gitea user exists
+- name: Verify bootstrap admin user exists in Gitea
+  ansible.builtin.uri:
+    url: "{{ jekyll_gitea_seed_api_base }}/api/v1/users/{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    method: GET
+    user: "{{ jekyll_gitea_seed_bootstrap_admin_username }}"
+    password: "{{ jekyll_gitea_seed_bootstrap_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: jekyll_gitea_seed_verify_bootstrap_user
+
+- name: Verify managed Jekyll user exists in Gitea
   ansible.builtin.uri:
     url: "{{ jekyll_gitea_seed_api_base }}/api/v1/users/{{ jekyll_gitea_seed_owner }}"
     method: GET

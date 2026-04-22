@@ -5,6 +5,12 @@
       - jekyll_gitea_seed_bootstrap_admin_username | length > 0
     fail_msg: "jekyll_gitea_seed_bootstrap_admin_username must be defined"
 
+- name: Assert Jekyll bootstrap admin email is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_bootstrap_admin_email | length > 0
+    fail_msg: "jekyll_gitea_seed_bootstrap_admin_email must be defined"
+
 - name: Assert Jekyll bootstrap admin password is defined
   ansible.builtin.assert:
     that:
@@ -46,3 +52,15 @@
     that:
       - jekyll_gitea_seed_api_base | length > 0
     fail_msg: "jekyll_gitea_seed_api_base must be defined"
+
+- name: Assert local Gitea binary path is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_gitea_binary_path | length > 0
+    fail_msg: "jekyll_gitea_seed_gitea_binary_path must be defined"
+
+- name: Assert local Gitea config path is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_gitea_seed_gitea_config_path | length > 0
+    fail_msg: "jekyll_gitea_seed_gitea_config_path must be defined"
