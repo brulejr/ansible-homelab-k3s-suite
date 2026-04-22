@@ -28,12 +28,12 @@ jekyll_gitea_seed_private_key_path: "{{ jekyll_gitea_seed_key_dir }}/id_ed25519"
 jekyll_gitea_seed_public_key_path: "{{ jekyll_gitea_seed_private_key_path }}.pub"
 jekyll_gitea_seed_deploy_key_title: jekyll-cluster-readonly
 
-jekyll_gitea_seed_known_host: "{{ gitea_host_domain }}"
-jekyll_gitea_seed_known_host_port: "{{ gitea_host_ssh_port }}"
+jekyll_gitea_seed_known_host: gitea.lab.brulenet.dev
+jekyll_gitea_seed_known_host_port: 2222
 
-jekyll_gitea_seed_api_base: "{{ gitea_host_root_url | regex_replace('/+$', '') }}"
+jekyll_gitea_seed_api_base: "https://gitea.lab.brulenet.dev:8443"
 
 # Local Gitea CLI execution
-jekyll_gitea_seed_gitea_binary_path: "{{ gitea_host_binary_path }}"
-jekyll_gitea_seed_gitea_config_path: "{{ gitea_host_config_dir }}/app.ini"
-jekyll_gitea_seed_gitea_run_user: "{{ gitea_host_run_user }}"
+jekyll_gitea_seed_gitea_binary_path: /opt/gitea/gitea
+jekyll_gitea_seed_gitea_config_path: /etc/gitea/app.ini
+jekyll_gitea_seed_gitea_run_user: git
