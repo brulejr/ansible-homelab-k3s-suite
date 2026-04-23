@@ -176,20 +176,30 @@
 
 - name: Set bootstrap git identity
   ansible.builtin.command:
-    cmd: "{{ item.cmd }}"
+    cmd: "{{ git_identity_cmd.cmd }}"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   loop:
     - { cmd: "git config user.name '{{ jekyll_gitea_seed_owner }}'" }
     - { cmd: "git config user.email '{{ jekyll_gitea_seed_owner_email }}'" }
+  loop_control:
+    loop_var: git_identity_cmd
   changed_when: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Set Gitea remote URL with managed user credentials
+- name: Set Gitea remote URL without embedded credentials
   ansible.builtin.command:
     cmd: >-
       git remote set-url origin
-      https://{{ jekyll_gitea_seed_owner | urlencode }}:{{ jekyll_gitea_seed_owner_password | urlencode }}@{{ jekyll_gitea_seed_known_host }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
+      https://{{ jekyll_gitea_seed_known_host }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Build HTTP Basic auth header for managed Gitea user
+  ansible.builtin.set_fact:
+    jekyll_gitea_seed_git_basic_auth_header: >-
+      AUTHORIZATION: Basic {{
+        (jekyll_gitea_seed_owner ~ ':' ~ jekyll_gitea_seed_owner_password) | b64encode
+      }}
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
 - name: Ensure template repo default branch is the requested branch
@@ -201,6 +211,8 @@
 
 - name: Push initial Jekyll template into Gitea when repo is empty
   ansible.builtin.command:
-    cmd: git push origin "{{ jekyll_gitea_seed_branch }}" --force
+    cmd: >-
+      git -c http.extraHeader="{{ jekyll_gitea_seed_git_basic_auth_header }}"
+      push origin "{{ jekyll_gitea_seed_branch }}" --force
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
