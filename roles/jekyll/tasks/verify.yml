@@ -1,30 +1,73 @@
 ---
-- name: Wait for any old Jekyll pods to clear
-  ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get pods -l app={{ jekyll_app_name }}
-  register: jekyll_pod_list
-  changed_when: false
-
 - name: Wait for Jekyll pod to become Ready
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} wait --for=condition=Ready pod -l app={{ jekyll_app_name }} --timeout=300s
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} wait --for=condition=Ready pod -l app={{ jekyll_app_name }} --timeout=120s
+  register: jekyll_wait_ready
   changed_when: false
+  failed_when: false
 
 - name: Get Jekyll objects
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get deploy,pods,svc
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get deploy,pods,svc -o wide
   register: jekyll_objects
   changed_when: false
+  failed_when: false
 
 - name: Get Jekyll ingressroute
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get ingressroute {{ jekyll_app_name }} -o yaml
   register: jekyll_ingress
   changed_when: false
+  failed_when: false
 
-- name: Get Jekyll pod logs
+- name: Get current Jekyll pod name
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} logs deploy/{{ jekyll_app_name }} -c jekyll --tail=200
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get pods -l app={{ jekyll_app_name }} -o jsonpath={.items[0].metadata.name}
+  register: jekyll_pod_name
+  changed_when: false
+  failed_when: false
+
+- name: Get Jekyll pod description
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} describe pod {{ jekyll_pod_name.stdout }}
+  register: jekyll_pod_describe
+  changed_when: false
+  failed_when: false
+  when: jekyll_pod_name.stdout | length > 0
+
+- name: Get Jekyll container logs
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} logs {{ jekyll_pod_name.stdout }} -c jekyll --tail=200
   register: jekyll_logs
   changed_when: false
   failed_when: false
+  when: jekyll_pod_name.stdout | length > 0
+
+- name: Get git-sync-init logs when present
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} logs {{ jekyll_pod_name.stdout }} -c git-sync-init --tail=200
+  register: jekyll_git_sync_logs
+  changed_when: false
+  failed_when: false
+  when: jekyll_pod_name.stdout | length > 0
+
+- name: Show Jekyll readiness result
+  ansible.builtin.debug:
+    msg:
+      - "Jekyll wait rc={{ jekyll_wait_ready.rc }}"
+      - "{{ jekyll_wait_ready.stdout | default('') }}"
+      - "{{ jekyll_wait_ready.stderr | default('') }}"
+
+- name: Show Jekyll objects
+  ansible.builtin.debug:
+    var: jekyll_objects.stdout_lines
+
+- name: Show Jekyll logs
+  ansible.builtin.debug:
+    var: jekyll_logs.stdout_lines
+  when: jekyll_logs is defined
+
+- name: Warn when Jekyll is not Ready
+  ansible.builtin.debug:
+    msg: "Jekyll deployment was applied, but the pod is not Ready yet. See debug output above."
+  when: jekyll_wait_ready.rc != 0
