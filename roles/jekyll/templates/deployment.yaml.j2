@@ -26,15 +26,21 @@ spec:
           env:
             - name: TMPDIR
               value: /tmp/jekyll
-            - name: JEKYLL_NO_BUNDLER_REQUIRE
-              value: "true"
+            - name: BUNDLE_APP_CONFIG
+              value: /usr/local/bundle
+            - name: BUNDLE_PATH
+              value: /usr/local/bundle
+            - name: GEM_HOME
+              value: /usr/local/bundle
+            - name: GEM_PATH
+              value: /usr/local/bundle
           command:
             - sh
             - -c
             - |
               set -e
               cd /srv/jekyll
-              exec jekyll serve \
+              exec bundle exec jekyll serve \
                 --trace \
                 --host 0.0.0.0 \
                 --port {{ jekyll_container_port }} \
