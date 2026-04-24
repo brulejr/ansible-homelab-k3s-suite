@@ -160,6 +160,7 @@
   changed_when: false
   failed_when: false
 
+# First-time seed only
 - name: Remove previous working copy if present
   ansible.builtin.file:
     path: "{{ jekyll_gitea_seed_work_dir }}/repo"
@@ -175,16 +176,7 @@
     recursive: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Render site Dockerfile into seeded repo
-  ansible.builtin.template:
-    src: Dockerfile.jekyll-site.j2
-    dest: "{{ jekyll_gitea_seed_work_dir }}/repo/Dockerfile"
-    owner: root
-    group: root
-    mode: "0644"
-  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
-
-- name: Set bootstrap git identity
+- name: Set bootstrap git identity for first-time seed
   ansible.builtin.command:
     cmd: "{{ git_identity_cmd.cmd }}"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
@@ -196,7 +188,7 @@
   changed_when: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Set Gitea remote URL without embedded credentials
+- name: Set Gitea remote URL without embedded credentials for first-time seed
   ansible.builtin.command:
     cmd: >-
       git remote set-url origin
@@ -210,23 +202,31 @@
       AUTHORIZATION: Basic {{
         (jekyll_gitea_seed_owner ~ ':' ~ jekyll_gitea_seed_owner_password) | b64encode
       }}
-  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Ensure template repo default branch is the requested branch
+- name: Ensure template repo default branch is the requested branch for first-time seed
   ansible.builtin.command:
     cmd: git checkout -B "{{ jekyll_gitea_seed_branch }}"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   changed_when: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Stage seeded repo content
+- name: Render site Dockerfile into first-time seeded repo
+  ansible.builtin.template:
+    src: Dockerfile.jekyll-site.j2
+    dest: "{{ jekyll_gitea_seed_work_dir }}/repo/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Stage first-time seeded repo content
   ansible.builtin.command:
     cmd: git add .
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   changed_when: false
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
-- name: Commit seeded repo content
+- name: Commit first-time seeded repo content
   ansible.builtin.command:
     cmd: git commit -m "Seed Jekyll site"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
@@ -234,7 +234,7 @@
   changed_when: jekyll_seed_commit.rc == 0
   failed_when: >
     jekyll_seed_commit.rc != 0 and
-    'nothing to commit' not in (jekyll_seed_commit.stdout | default('') ~ ' ' ~ jekyll_seed_commit.stderr | default(''))
+    'nothing to commit' not in ((jekyll_seed_commit.stdout | default('')) ~ ' ' ~ (jekyll_seed_commit.stderr | default('')))
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
 - name: Push initial Jekyll template into Gitea when repo is empty
@@ -244,3 +244,64 @@
       push origin "{{ jekyll_gitea_seed_branch }}" --force
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+# Idempotent maintenance pass for already-populated repo
+- name: Remove previous maintenance working copy if present
+  ansible.builtin.file:
+    path: "{{ jekyll_gitea_seed_work_dir }}/repo-maint"
+    state: absent
+
+- name: Clone current Jekyll repo for maintenance
+  ansible.builtin.command:
+    cmd: >-
+      git
+      -c http.extraHeader={{ jekyll_gitea_seed_git_basic_auth_header | quote }}
+      clone
+      --branch {{ jekyll_gitea_seed_branch | quote }}
+      --single-branch
+      https://{{ jekyll_gitea_seed_known_host }}:8443/{{ jekyll_gitea_seed_owner }}/{{ jekyll_gitea_seed_repo_name }}.git
+      {{ jekyll_gitea_seed_work_dir }}/repo-maint
+  changed_when: true
+
+- name: Set bootstrap git identity for maintenance clone
+  ansible.builtin.command:
+    cmd: "{{ git_identity_cmd.cmd }}"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo-maint"
+  loop:
+    - { cmd: "git config user.name '{{ jekyll_gitea_seed_owner }}'" }
+    - { cmd: "git config user.email '{{ jekyll_gitea_seed_owner_email }}'" }
+  loop_control:
+    loop_var: git_identity_cmd
+  changed_when: false
+
+- name: Render site Dockerfile into maintained repo
+  ansible.builtin.template:
+    src: Dockerfile.jekyll-site.j2
+    dest: "{{ jekyll_gitea_seed_work_dir }}/repo-maint/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Stage maintained repo content
+  ansible.builtin.command:
+    cmd: git add Dockerfile
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo-maint"
+  changed_when: false
+
+- name: Commit maintained repo content
+  ansible.builtin.command:
+    cmd: git commit -m "Add local Jekyll runtime Dockerfile"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo-maint"
+  register: jekyll_seed_maintenance_commit
+  changed_when: jekyll_seed_maintenance_commit.rc == 0
+  failed_when: >
+    jekyll_seed_maintenance_commit.rc != 0 and
+    'nothing to commit' not in ((jekyll_seed_maintenance_commit.stdout | default('')) ~ ' ' ~ (jekyll_seed_maintenance_commit.stderr | default('')))
+
+- name: Push maintained repo content when changed
+  ansible.builtin.command:
+    cmd: >-
+      git -c http.extraHeader="{{ jekyll_gitea_seed_git_basic_auth_header }}"
+      push origin "{{ jekyll_gitea_seed_branch }}"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo-maint"
+  when: jekyll_seed_maintenance_commit.rc == 0
