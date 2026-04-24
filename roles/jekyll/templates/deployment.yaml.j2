@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ jekyll_app_name }}
+  namespace: {{ jekyll_namespace }}
+spec:
+  replicas: {{ jekyll_replicas }}
+  selector:
+    matchLabels:
+      app: {{ jekyll_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ jekyll_app_name }}
+    spec:
+      initContainers:
+        - name: init-site-root
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p {{ jekyll_bundle_cache_mount_path }}
+              chown -R 1000:1000 {{ jekyll_bundle_cache_mount_path }}
+          volumeMounts:
+            - name: bundle-cache
+              mountPath: {{ jekyll_bundle_cache_mount_path }}
+
+      containers:
+        - name: git-sync
+          image: {{ jekyll_git_sync_image }}
+          env:
+            - name: GITSYNC_REPO
+              value: {{ jekyll_git_repo | quote }}
+            - name: GITSYNC_REF
+              value: {{ jekyll_git_branch | quote }}
+            - name: GITSYNC_ROOT
+              value: {{ jekyll_git_root_mount_path | quote }}
+            - name: GITSYNC_LINK
+              value: {{ jekyll_git_link_name | quote }}
+            - name: GITSYNC_PERIOD
+              value: "{{ jekyll_git_sync_wait_seconds }}s"
+            - name: GITSYNC_SSH
+              value: "true"
+            - name: GITSYNC_SSH_KEY_FILE
+              value: /etc/git-secret/ssh
+            - name: GITSYNC_SSH_KNOWN_HOSTS
+              value: "true"
+            - name: GITSYNC_SSH_KNOWN_HOSTS_FILE
+              value: /etc/git-secret/known_hosts
+          volumeMounts:
+            - name: git-root
+              mountPath: {{ jekyll_git_root_mount_path | quote }}
+            - name: git-secret
+              mountPath: /etc/git-secret
+              readOnly: true
+
+        - name: jekyll
+          image: {{ jekyll_image }}
+          command:
+            - sh
+            - -c
+            - |
+              cd {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }} && \
+              bundle install && \
+              bundle exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
+          env:
+            - name: TZ
+              value: {{ jekyll_site_timezone | quote }}
+          ports:
+            - containerPort: {{ jekyll_container_port }}
+          volumeMounts:
+            - name: git-root
+              mountPath: {{ jekyll_git_root_mount_path | quote }}
+            - name: bundle-cache
+              mountPath: {{ jekyll_bundle_cache_mount_path | quote }}
+
+      volumes:
+        - name: git-root
+          emptyDir: {}
+        - name: git-secret
+          secret:
+            secretName: {{ jekyll_app_name }}-git
+            defaultMode: 0400
+        - name: bundle-cache
+          persistentVolumeClaim:
+            claimName: {{ jekyll_app_name }}

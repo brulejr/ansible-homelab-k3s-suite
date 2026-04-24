@@ -1,0 +1,12 @@
+---
+- name: Validate jekyll configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: jekyll_enabled | bool
+
+- name: Install and configure jekyll
+  ansible.builtin.include_tasks: install.yml
+  when: jekyll_enabled | bool
+
+- name: Verify jekyll
+  ansible.builtin.include_tasks: verify.yml
+  when: jekyll_enabled | bool

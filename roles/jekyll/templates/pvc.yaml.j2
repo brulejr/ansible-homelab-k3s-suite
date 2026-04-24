@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ jekyll_app_name }}
+  namespace: {{ jekyll_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ jekyll_storage_size }}
+  storageClassName: {{ jekyll_storage_class }}

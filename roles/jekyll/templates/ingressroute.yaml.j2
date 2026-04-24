@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ jekyll_app_name }}
+  namespace: {{ jekyll_namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ jekyll_hostname }}`)
+      kind: Rule
+{% if jekyll_ingress_middlewares | length > 0 %}
+      middlewares:
+{% for middleware in jekyll_ingress_middlewares %}
+        - name: {{ middleware }}
+{% endfor %}
+{% endif %}
+      services:
+        - name: {{ jekyll_app_name }}
+          port: {{ jekyll_service_port }}
+{% if jekyll_tls_enabled %}
+  tls:
+    certResolver: {{ jekyll_tls_cert_resolver }}
+{% endif %}
