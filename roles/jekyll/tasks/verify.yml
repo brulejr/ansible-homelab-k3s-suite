@@ -1,12 +1,18 @@
 ---
-- name: Wait for Jekyll deployment rollout
+- name: Wait for any old Jekyll pods to clear
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} rollout status deploy/{{ jekyll_app_name }} --timeout=300s
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get pods -l app={{ jekyll_app_name }}
+  register: jekyll_pod_list
+  changed_when: false
+
+- name: Wait for Jekyll pod to become Ready
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} wait --for=condition=Ready pod -l app={{ jekyll_app_name }} --timeout=300s
   changed_when: false
 
 - name: Get Jekyll objects
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get deploy,pods,svc,pvc
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} get deploy,pods,svc
   register: jekyll_objects
   changed_when: false
 
@@ -18,7 +24,7 @@
 
 - name: Get Jekyll pod logs
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} logs deploy/{{ jekyll_app_name }} --tail=200
+    cmd: /usr/local/bin/k3s kubectl -n {{ jekyll_namespace }} logs deploy/{{ jekyll_app_name }} -c jekyll --tail=200
   register: jekyll_logs
   changed_when: false
   failed_when: false

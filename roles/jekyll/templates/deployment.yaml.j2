@@ -5,6 +5,8 @@ metadata:
   namespace: {{ jekyll_namespace }}
 spec:
   replicas: {{ jekyll_replicas }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: {{ jekyll_app_name }}
@@ -13,6 +15,8 @@ spec:
       labels:
         app: {{ jekyll_app_name }}
     spec:
+      terminationGracePeriodSeconds: 5
+
       initContainers:
         - name: git-sync-init
           image: {{ jekyll_git_sync_image }}
