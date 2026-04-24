@@ -19,6 +19,7 @@ spec:
       containers:
         - name: git-sync
           image: {{ jekyll_git_sync_image }}
+          imagePullPolicy: IfNotPresent
           env:
             - name: GITSYNC_REPO
               value: {{ jekyll_git_repo | quote }}
