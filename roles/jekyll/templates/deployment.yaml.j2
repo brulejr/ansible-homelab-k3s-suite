@@ -40,6 +40,8 @@ spec:
               value: {{ jekyll_git_link_name | quote }}
             - name: GITSYNC_PERIOD
               value: "{{ jekyll_git_sync_wait_seconds }}s"
+            - name: GITSYNC_ONE_TIME
+              value: "false"
             - name: GITSYNC_SSH
               value: "true"
             - name: GITSYNC_SSH_KEY_FILE
@@ -48,6 +50,8 @@ spec:
               value: "true"
             - name: GITSYNC_SSH_KNOWN_HOSTS_FILE
               value: /etc/git-secret/known_hosts
+            - name: GITSYNC_VERBOSE
+              value: "5"
           volumeMounts:
             - name: git-root
               mountPath: {{ jekyll_git_root_mount_path | quote }}
@@ -61,10 +65,18 @@ spec:
             - sh
             - -c
             - |
-              until [ -f {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}/Gemfile ]; do
-                echo "Waiting for git-sync to publish repo..."
+              echo "Waiting for git-sync worktree..."
+              until [ -e {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }} ]; do
+                ls -la {{ jekyll_git_root_mount_path }} || true
                 sleep 2
               done
+
+              echo "Waiting for Gemfile..."
+              until [ -f {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}/Gemfile ]; do
+                ls -la {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }} || true
+                sleep 2
+              done
+
               cd {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}
               bundle install
               bundle exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
