@@ -11,26 +11,8 @@
       - jekyll_hostname | length > 0
     fail_msg: "jekyll_hostname must be defined"
 
-- name: Assert Jekyll git repo is defined
+- name: Assert Jekyll image is defined
   ansible.builtin.assert:
     that:
-      - jekyll_git_repo | length > 0
-    fail_msg: "jekyll_git_repo must be defined"
-
-- name: Assert Jekyll storage class is defined
-  ansible.builtin.assert:
-    that:
-      - jekyll_storage_class | length > 0
-    fail_msg: "jekyll_storage_class must be defined"
-
-- name: Assert Jekyll SSH private key path is defined
-  ansible.builtin.assert:
-    that:
-      - jekyll_ssh_private_key_path | length > 0
-    fail_msg: "jekyll_ssh_private_key_path must be defined"
-
-- name: Assert Jekyll known host is defined
-  ansible.builtin.assert:
-    that:
-      - jekyll_known_host | length > 0
-    fail_msg: "jekyll_known_host must be defined"
+      - jekyll_image | length > 0
+    fail_msg: "jekyll_image must be defined"

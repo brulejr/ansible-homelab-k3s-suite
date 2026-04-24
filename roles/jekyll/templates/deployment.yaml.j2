@@ -16,35 +16,6 @@ spec:
         app: {{ jekyll_app_name }}
     spec:
       terminationGracePeriodSeconds: 5
-
-      initContainers:
-        - name: clone-site
-          image: docker.io/alpine/git:2.47.2
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: GIT_SSH_COMMAND
-              value: >-
-                ssh -i /etc/git-secret/ssh
-                -o IdentitiesOnly=yes
-                -o StrictHostKeyChecking=yes
-                -o UserKnownHostsFile=/etc/git-secret/known_hosts
-          command:
-            - sh
-            - -c
-            - |
-              set -e
-              rm -rf /site/.git /site/* /site/.[!.]* /site/..?* 2>/dev/null || true
-              git clone --depth 1 --branch {{ jekyll_git_branch }} {{ jekyll_git_repo }} /site
-              mkdir -p /site/.jekyll-cache /site/_site
-              chown -R 1000:1000 /site
-              chmod -R u+rwX /site
-          volumeMounts:
-            - name: git-secret
-              mountPath: /etc/git-secret
-              readOnly: true
-            - name: site-root
-              mountPath: /site
-
       containers:
         - name: jekyll
           image: {{ jekyll_image }}
@@ -62,13 +33,13 @@ spec:
             - -c
             - |
               set -e
-              cd /site
+              cd /srv/jekyll
               exec jekyll serve \
                 --trace \
                 --host 0.0.0.0 \
                 --port {{ jekyll_container_port }} \
-                --source /site \
-                --destination /site/_site \
+                --source /srv/jekyll \
+                --destination /tmp/jekyll-site \
                 --disable-disk-cache \
                 --force_polling
           ports:
@@ -92,17 +63,13 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
           volumeMounts:
-            - name: site-root
-              mountPath: /site
             - name: jekyll-tmp
               mountPath: /tmp/jekyll
+            - name: jekyll-site
+              mountPath: /tmp/jekyll-site
 
       volumes:
-        - name: git-secret
-          secret:
-            secretName: {{ jekyll_app_name }}-git
-            defaultMode: 0400
-        - name: site-root
-          emptyDir: {}
         - name: jekyll-tmp
+          emptyDir: {}
+        - name: jekyll-site
           emptyDir: {}

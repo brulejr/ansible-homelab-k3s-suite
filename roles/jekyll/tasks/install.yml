@@ -1,15 +1,4 @@
 ---
-- name: Read Jekyll SSH private key from host
-  ansible.builtin.slurp:
-    src: "{{ jekyll_ssh_private_key_path }}"
-  register: jekyll_ssh_private_key
-
-- name: Collect Gitea SSH host key
-  ansible.builtin.command:
-    cmd: ssh-keyscan -p {{ jekyll_known_host_port }} {{ jekyll_known_host }}
-  register: jekyll_known_hosts_scan
-  changed_when: false
-
 - name: Render Jekyll namespace manifest
   ansible.builtin.template:
     src: namespace.yaml.j2
@@ -21,32 +10,6 @@
 - name: Apply Jekyll namespace manifest
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ jekyll_app_name }}-namespace.yaml
-  changed_when: false
-
-- name: Render Jekyll Git secret manifest
-  ansible.builtin.template:
-    src: git-secret.yaml.j2
-    dest: /tmp/{{ jekyll_app_name }}-git-secret.yaml
-    owner: root
-    group: root
-    mode: "0600"
-
-- name: Apply Jekyll Git secret manifest
-  ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ jekyll_app_name }}-git-secret.yaml
-  changed_when: false
-
-- name: Render Jekyll PVC manifest
-  ansible.builtin.template:
-    src: pvc.yaml.j2
-    dest: /tmp/{{ jekyll_app_name }}-pvc.yaml
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Apply Jekyll PVC manifest
-  ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/{{ jekyll_app_name }}-pvc.yaml
   changed_when: false
 
 - name: Render Jekyll deployment manifest
