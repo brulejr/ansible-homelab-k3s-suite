@@ -72,7 +72,7 @@ spec:
               done
 
               cd {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}
-              bundle exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
+              exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
           ports:
             - containerPort: {{ jekyll_container_port }}
           volumeMounts:
