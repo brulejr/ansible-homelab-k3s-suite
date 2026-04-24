@@ -55,6 +55,11 @@ spec:
         - name: jekyll
           image: {{ jekyll_image }}
           imagePullPolicy: IfNotPresent
+          env:
+            - name: TMPDIR
+              value: /tmp/jekyll
+            - name: JEKYLL_NO_BUNDLER_REQUIRE
+              value: "true"
           command:
             - sh
             - -c
@@ -71,13 +76,28 @@ spec:
                 sleep 2
               done
 
+              mkdir -p /tmp/jekyll /srv/jekyll-cache /srv/jekyll-site
+
               cd {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}
-              exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
+              exec jekyll serve \
+                --host 0.0.0.0 \
+                --port {{ jekyll_container_port }} \
+                --source . \
+                --destination /srv/jekyll-site \
+                --disable-disk-cache \
+                --force_polling
           ports:
             - containerPort: {{ jekyll_container_port }}
           volumeMounts:
             - name: git-root
               mountPath: {{ jekyll_git_root_mount_path | quote }}
+              readOnly: true
+            - name: jekyll-tmp
+              mountPath: /tmp/jekyll
+            - name: jekyll-site
+              mountPath: /srv/jekyll-site
+            - name: jekyll-cache
+              mountPath: /srv/jekyll-cache
 
       volumes:
         - name: git-root
@@ -86,3 +106,9 @@ spec:
           secret:
             secretName: {{ jekyll_app_name }}-git
             defaultMode: 0440
+        - name: jekyll-tmp
+          emptyDir: {}
+        - name: jekyll-site
+          emptyDir: {}
+        - name: jekyll-cache
+          emptyDir: {}
