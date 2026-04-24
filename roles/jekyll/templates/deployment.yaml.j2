@@ -13,9 +13,6 @@ spec:
       labels:
         app: {{ jekyll_app_name }}
     spec:
-      securityContext:
-        fsGroup: 65533
-
       initContainers:
         - name: git-sync-init
           image: {{ jekyll_git_sync_image }}
@@ -58,15 +55,12 @@ spec:
             - -c
             - |
               set -e
-              echo "Contents of /git before copy:"
-              ls -la /git
               test -e /git/repo
               mkdir -p /site
               cp -a /git/repo/. /site/
-              chmod -R u+rwX,g+rwX /site
               mkdir -p /site/.jekyll-cache /site/_site
-              echo "Contents of /site after copy:"
-              ls -la /site
+              chown -R 1000:1000 /site
+              chmod -R u+rwX /site
           volumeMounts:
             - name: git-root
               mountPath: /git
@@ -78,6 +72,9 @@ spec:
         - name: jekyll
           image: {{ jekyll_image }}
           imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
           env:
             - name: TMPDIR
               value: /tmp/jekyll
