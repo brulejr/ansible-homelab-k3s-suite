@@ -64,6 +64,7 @@ spec:
               set -e
               cd /site
               exec jekyll serve \
+                --trace \
                 --host 0.0.0.0 \
                 --port {{ jekyll_container_port }} \
                 --source /site \
@@ -71,8 +72,25 @@ spec:
                 --disable-disk-cache \
                 --force_polling
           ports:
-            - containerPort: {{ jekyll_container_port }}
-              name: http
+            - name: http
+              containerPort: {{ jekyll_container_port }}
+          startupProbe:
+            tcpSocket:
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
           volumeMounts:
             - name: site-root
               mountPath: /site
