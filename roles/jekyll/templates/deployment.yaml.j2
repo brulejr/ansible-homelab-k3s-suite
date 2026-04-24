@@ -16,19 +16,6 @@ spec:
       securityContext:
         fsGroup: 65533
 
-      initContainers:
-        - name: init-site-root
-          image: busybox:1.36
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p {{ jekyll_bundle_cache_mount_path }}
-              chown -R 1000:1000 {{ jekyll_bundle_cache_mount_path }}
-          volumeMounts:
-            - name: bundle-cache
-              mountPath: {{ jekyll_bundle_cache_mount_path }}
-
       containers:
         - name: git-sync
           image: {{ jekyll_git_sync_image }}
@@ -66,6 +53,7 @@ spec:
 
         - name: jekyll
           image: {{ jekyll_image }}
+          imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
@@ -83,18 +71,12 @@ spec:
               done
 
               cd {{ jekyll_git_root_mount_path }}/{{ jekyll_git_link_name }}
-              bundle install
               bundle exec jekyll serve --host 0.0.0.0 --port {{ jekyll_container_port }} --source . --destination _site
-          env:
-            - name: TZ
-              value: {{ jekyll_site_timezone | quote }}
           ports:
             - containerPort: {{ jekyll_container_port }}
           volumeMounts:
             - name: git-root
               mountPath: {{ jekyll_git_root_mount_path | quote }}
-            - name: bundle-cache
-              mountPath: {{ jekyll_bundle_cache_mount_path | quote }}
 
       volumes:
         - name: git-root
@@ -103,6 +85,3 @@ spec:
           secret:
             secretName: {{ jekyll_app_name }}-git
             defaultMode: 0440
-        - name: bundle-cache
-          persistentVolumeClaim:
-            claimName: {{ jekyll_app_name }}

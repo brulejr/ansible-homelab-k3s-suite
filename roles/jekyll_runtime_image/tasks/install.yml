@@ -1,0 +1,45 @@
+---
+- name: Install podman packages
+  ansible.builtin.package:
+    name:
+      - podman
+      - buildah
+      - ca-certificates
+      - git
+    state: present
+
+- name: Ensure runtime image work directory exists
+  ansible.builtin.file:
+    path: "{{ jekyll_runtime_image_work_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Remove previous runtime image checkout
+  ansible.builtin.file:
+    path: "{{ jekyll_runtime_image_work_dir }}/repo"
+    state: absent
+
+- name: Clone seeded Jekyll repo for image build
+  ansible.builtin.git:
+    repo: "https://{{ jekyll_runtime_image_git_username | urlencode }}:{{ jekyll_runtime_image_git_password | urlencode }}@gitea.lab.brulenet.dev:8443/{{ jekyll_runtime_image_repo_owner }}/{{ jekyll_runtime_image_repo_name }}.git"
+    version: "{{ jekyll_runtime_image_branch }}"
+    dest: "{{ jekyll_runtime_image_work_dir }}/repo"
+    force: true
+    recursive: false
+
+- name: Build Jekyll runtime image locally
+  ansible.builtin.command:
+    cmd: podman build -t {{ jekyll_runtime_image_name }} .
+    chdir: "{{ jekyll_runtime_image_work_dir }}/repo"
+  register: jekyll_runtime_image_build
+  changed_when: true
+
+- name: Import image into k3s containerd
+  ansible.builtin.shell: >-
+    podman save {{ jekyll_runtime_image_name }} |
+    /usr/local/bin/k3s ctr images import -
+  args:
+    executable: /bin/bash
+  changed_when: true

@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Jon Brule
+  description: Build and import a local Jekyll runtime image on the target host
+  license: MIT
+  min_ansible_version: "2.16"
+dependencies: []

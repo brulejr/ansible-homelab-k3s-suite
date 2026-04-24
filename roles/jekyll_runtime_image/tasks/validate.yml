@@ -1,0 +1,12 @@
+---
+- name: Assert runtime image git password is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_runtime_image_git_password | length > 0
+    fail_msg: "jekyll_runtime_image_git_password must be defined"
+
+- name: Assert runtime image name is defined
+  ansible.builtin.assert:
+    that:
+      - jekyll_runtime_image_name | length > 0
+    fail_msg: "jekyll_runtime_image_name must be defined"

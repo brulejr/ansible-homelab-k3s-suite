@@ -5,7 +5,7 @@ jekyll_namespace: apps
 jekyll_app_name: jekyll
 jekyll_hostname: docs.lab.example.com
 
-jekyll_image: jekyll/jekyll:4
+jekyll_image: localhost/brulenet-jekyll:latest
 jekyll_git_sync_image: registry.k8s.io/git-sync/git-sync:v4.4.1
 
 jekyll_replicas: 1
@@ -16,18 +16,13 @@ jekyll_tls_enabled: true
 jekyll_tls_cert_resolver: le
 jekyll_ingress_middlewares: []
 
-jekyll_storage_class: longhorn
-jekyll_storage_size: 2Gi
-
 jekyll_git_repo: ""
 jekyll_git_branch: main
 jekyll_git_sync_wait_seconds: 30
 
-jekyll_bundle_cache_mount_path: /usr/local/bundle
 jekyll_git_root_mount_path: /git
 jekyll_git_link_name: repo
-jekyll_site_timezone: America/New_York
+jekyll_known_host: 10.10.50.50
+jekyll_known_host_port: 2222
 
 jekyll_ssh_private_key_path: /etc/jekyll-git/id_ed25519
-jekyll_known_host: gitea.lab.brulenet.dev
-jekyll_known_host_port: 2222

@@ -1,0 +1,13 @@
+---
+jekyll_runtime_image_enabled: true
+
+jekyll_runtime_image_repo_owner: jekyll
+jekyll_runtime_image_repo_name: brulenet-doco
+jekyll_runtime_image_branch: main
+
+jekyll_runtime_image_work_dir: /var/tmp/jekyll-runtime-image
+jekyll_runtime_image_git_url: "https://gitea.lab.brulenet.dev:8443/jekyll/brulenet-doco.git"
+jekyll_runtime_image_git_username: jekyll
+jekyll_runtime_image_git_password: ""
+
+jekyll_runtime_image_name: localhost/brulenet-jekyll:latest

@@ -1,0 +1,12 @@
+---
+- name: Verify local image exists in k3s runtime
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s ctr images ls
+  register: jekyll_runtime_images
+  changed_when: false
+
+- name: Assert local Jekyll image is present
+  ansible.builtin.assert:
+    that:
+      - jekyll_runtime_image_name in jekyll_runtime_images.stdout
+    fail_msg: "Jekyll runtime image was not found in k3s containerd"

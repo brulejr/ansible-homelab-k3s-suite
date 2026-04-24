@@ -1,0 +1,12 @@
+---
+- name: Validate jekyll_runtime_image configuration
+  ansible.builtin.include_tasks: validate.yml
+  when: jekyll_runtime_image_enabled | bool
+
+- name: Install and configure jekyll_runtime_image
+  ansible.builtin.include_tasks: install.yml
+  when: jekyll_runtime_image_enabled | bool
+
+- name: Verify jekyll_runtime_image
+  ansible.builtin.include_tasks: verify.yml
+  when: jekyll_runtime_image_enabled | bool

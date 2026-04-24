@@ -172,6 +172,16 @@
     version: "{{ jekyll_gitea_seed_template_ref }}"
     dest: "{{ jekyll_gitea_seed_work_dir }}/repo"
     force: true
+    recursive: false
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Render site Dockerfile into seeded repo
+  ansible.builtin.template:
+    src: Dockerfile.jekyll-site.j2
+    dest: "{{ jekyll_gitea_seed_work_dir }}/repo/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
 - name: Set bootstrap git identity
@@ -207,6 +217,24 @@
     cmd: git checkout -B "{{ jekyll_gitea_seed_branch }}"
     chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
   changed_when: false
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Stage seeded repo content
+  ansible.builtin.command:
+    cmd: git add .
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  changed_when: false
+  when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
+
+- name: Commit seeded repo content
+  ansible.builtin.command:
+    cmd: git commit -m "Seed Jekyll site"
+    chdir: "{{ jekyll_gitea_seed_work_dir }}/repo"
+  register: jekyll_seed_commit
+  changed_when: jekyll_seed_commit.rc == 0
+  failed_when: >
+    jekyll_seed_commit.rc != 0 and
+    'nothing to commit' not in (jekyll_seed_commit.stdout | default('') ~ ' ' ~ jekyll_seed_commit.stderr | default(''))
   when: jekyll_gitea_seed_ls_remote.stdout | trim == ""
 
 - name: Push initial Jekyll template into Gitea when repo is empty
