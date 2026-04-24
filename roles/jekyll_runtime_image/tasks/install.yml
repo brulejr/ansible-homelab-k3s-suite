@@ -40,9 +40,15 @@
       {{ jekyll_runtime_image_work_dir }}/repo
   changed_when: true
 
+- name: Initialize Chirpy submodules for image build
+  ansible.builtin.command:
+    cmd: git submodule update --init --recursive
+    chdir: "{{ jekyll_runtime_image_work_dir }}/repo"
+  changed_when: true
+
 - name: Build Jekyll runtime image locally
   ansible.builtin.command:
-    cmd: podman build -t {{ jekyll_runtime_image_name }} .
+    cmd: podman build --no-cache -t {{ jekyll_runtime_image_name }} .
     chdir: "{{ jekyll_runtime_image_work_dir }}/repo"
   register: jekyll_runtime_image_build
   changed_when: true
