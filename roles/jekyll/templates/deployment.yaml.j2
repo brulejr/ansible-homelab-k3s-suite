@@ -53,6 +53,8 @@ spec:
               value: "true"
             - name: GITSYNC_SSH_KNOWN_HOSTS_FILE
               value: /etc/git-secret/known_hosts
+            - name: GITSYNC_SUBMODULES
+              value: "off"
             - name: GITSYNC_VERBOSE
               value: "5"
           volumeMounts:
