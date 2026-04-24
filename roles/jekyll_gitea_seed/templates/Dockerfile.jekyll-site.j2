@@ -21,11 +21,9 @@ RUN useradd -m -u 1000 -s /bin/bash jekyll
 
 WORKDIR /srv/jekyll
 
-COPY Gemfile ./
-COPY Gemfile.lock* ./
-RUN bundle install
-
 COPY . .
+
+RUN bundle install
 
 RUN chown -R 1000:1000 /srv/jekyll /usr/local/bundle
 
