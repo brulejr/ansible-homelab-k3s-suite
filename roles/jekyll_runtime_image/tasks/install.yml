@@ -21,13 +21,24 @@
     path: "{{ jekyll_runtime_image_work_dir }}/repo"
     state: absent
 
+- name: Build HTTP Basic auth header for runtime image repo clone
+  ansible.builtin.set_fact:
+    jekyll_runtime_image_git_basic_auth_header: >-
+      AUTHORIZATION: Basic {{
+        (jekyll_runtime_image_git_username ~ ':' ~ jekyll_runtime_image_git_password) | b64encode
+      }}
+
 - name: Clone seeded Jekyll repo for image build
-  ansible.builtin.git:
-    repo: "https://{{ jekyll_runtime_image_git_username | urlencode }}:{{ jekyll_runtime_image_git_password | urlencode }}@gitea.lab.brulenet.dev:8443/{{ jekyll_runtime_image_repo_owner }}/{{ jekyll_runtime_image_repo_name }}.git"
-    version: "{{ jekyll_runtime_image_branch }}"
-    dest: "{{ jekyll_runtime_image_work_dir }}/repo"
-    force: true
-    recursive: false
+  ansible.builtin.command:
+    cmd: >-
+      git
+      -c http.extraHeader={{ jekyll_runtime_image_git_basic_auth_header | quote }}
+      clone
+      --branch {{ jekyll_runtime_image_branch | quote }}
+      --single-branch
+      https://gitea.lab.brulenet.dev:8443/{{ jekyll_runtime_image_repo_owner }}/{{ jekyll_runtime_image_repo_name }}.git
+      {{ jekyll_runtime_image_work_dir }}/repo
+  changed_when: true
 
 - name: Build Jekyll runtime image locally
   ansible.builtin.command:
